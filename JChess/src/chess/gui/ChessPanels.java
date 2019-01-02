@@ -5,7 +5,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -96,8 +95,8 @@ public class ChessPanels{
 		private final int tileFile;
 		private final int tileRank;
 		
-		private Color lightTileColor = new Color(217, 202, 169);
-		private Color darkTileColor = new Color(10, 15, 12);
+		private Color lightTileColor = new Color(222,227, 230);
+		private Color darkTileColor = new Color(140, 162, 173);
 		
 		TilePanel(int tileFile,int tileRank){	
 			super(new BorderLayout());
@@ -123,10 +122,11 @@ public class ChessPanels{
 		public JLabel pieceIcon() {
 			
 			Piece piece = getBoard().getPiece(getTileFile(), getTileRank());
-			System.out.println((new File("BB.png")).exists());
-			ImageIcon pieceImage = new ImageIcon(piece.getPieceColor().getColorString()+piece.getPieceType().getPieceTypeString()+".png");
+			ImageIcon pieceImage = new ImageIcon("images/"+piece.getPieceColor().getColorString()+piece.getPieceType().getPieceTypeString()+".png");
 			
 			JLabel label = new JLabel(pieceImage,SwingConstants.CENTER);
+			label.setPreferredSize(new Dimension(80,80));
+			
 			label.setVerticalAlignment(SwingConstants.CENTER);
 			
 			return label;
