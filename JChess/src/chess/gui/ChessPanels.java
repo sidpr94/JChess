@@ -5,6 +5,8 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,9 +15,11 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 
 import chess.board.Board;
 import chess.board.BoardUtil;
+import chess.move.MoveState;
 import chess.pieces.Piece;
 
 public class ChessPanels{
@@ -23,11 +27,14 @@ public class ChessPanels{
 	private final JFrame gameWindow;
 	private final BoardPanel boardPanel;
 	private Board chessBoard;
+	private Piece movePiece;
+	private MoveState moveState;
 	
 	public ChessPanels() {
 		this.gameWindow = new JFrame("Sid's Chess App");
 		this.chessBoard = Board.createStandardBoard();
 		this.boardPanel = new BoardPanel();
+		this.moveState = MoveState.CHOOSE;
 		gameWindow.add(boardPanel);
 	}
 	
@@ -104,6 +111,15 @@ public class ChessPanels{
 			this.tileRank = tileRank;
 			assignTileColor();
 			add(pieceIcon(),BorderLayout.CENTER);
+			addMouseListener(new MouseAdapter() {
+				public void mouseClicked(MouseEvent e) {
+			        if(SwingUtilities.isLeftMouseButton(e)) {
+			        	if(moveState == MoveState.CHOOSE) {
+			        		
+			        	}
+			        }
+			    }
+			});
 		}
 		
 		private void assignTileColor() {
@@ -139,6 +155,7 @@ public class ChessPanels{
 		private int getTileRank() {
 			return tileRank;
 		}
+
 	}
 }
 
