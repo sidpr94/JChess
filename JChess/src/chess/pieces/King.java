@@ -56,6 +56,8 @@ public class King extends Piece {
 		for(Piece piece : board.getAllActivePieces()){
 			if(piece.getPieceColor() != this.getPieceColor()) {
 				for(Move move : piece.getLegalMoves(board)) {
+					System.out.println("Piece: "+piece.getPieceType().getPieceNotation(piece.getPieceColor())+", piece file: "+piece.getFile()+", piece rank: "+piece.getRank()+", piece coord "+BoardUtil.getCoordinate(piece.getFile(),piece.getRank()));
+					System.out.println("Move: "+move.getMoveFile()+", "+move.getMoveRank());
 					if((move.getMoveFile() == this.getFile()) & (move.getMoveRank() == this.getRank())) {
 						checkFlag = true;
 					}

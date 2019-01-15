@@ -57,37 +57,6 @@ public class Board {
 		return Collections.unmodifiableList(Arrays.asList(pieces));
 	}
 	
-	public static Board createTestBoard() {
-		Builder builder = new Builder();
-		builder.setPiece(new Rook(Color.WHITE, 0, 0, false));
-		builder.setPiece(new NoPiece(1,0));
-		builder.setPiece(new NoPiece(2,0));
-		builder.setPiece(new NoPiece(3,0));
-		builder.setPiece(new King(Color.WHITE,4,0,false));
-		builder.setPiece(new NoPiece(5,0));
-		builder.setPiece(new NoPiece(6,0));
-		builder.setPiece(new Rook(Color.WHITE,7,0,false));
-		
-		builder.setPiece(new NoPiece(0, 1));
-		builder.setPiece(new Queen(Color.BLACK,1,1));
-		builder.setPiece(new NoPiece(2,1));
-		builder.setPiece(new NoPiece(3,1));
-		builder.setPiece(new NoPiece(4,1));
-		builder.setPiece(new NoPiece(5,1));
-		builder.setPiece(new Queen(Color.BLACK,6,1));
-		builder.setPiece(new NoPiece(7,1));
-		for(int j = 2; j < 8; j++) {
-			for(int i = 0; i < 8; i++) {
-				if(j == 1) {
-				}
-				builder.setPiece(new NoPiece(i,j));
-			}
-		}
-		builder.setMover(Color.WHITE);
-		builder.enPassantPawn(null);
-		
-		return builder.execute();
-	}
 	public static Board createStandardBoard() {
 		// TODO Auto-generated method stub
 		Builder builder = new Builder();
@@ -194,13 +163,8 @@ public class Board {
 	public List<Move> movesToCheck(List<Move> legalMoves) {
 		for(Move move : legalMoves) {
 			Board moveBoard = move.execute();
-			Player player;
-			if(legalMoves.get(0).getMovePiece().getPieceColor() == Color.WHITE) {
-				player = moveBoard.getWhitePlayer();
-			}else {
-				player = moveBoard.getBlackPlayer();
-			}
-			if(player.getKing().isInCheck(moveBoard)) {
+			Player currentPlayer = moveBoard.getCurrentPlayer();
+			if(currentPlayer.getKing().isInCheck(moveBoard)) {
 				legalMoves.remove(move);
 			};
 		}
@@ -243,6 +207,14 @@ public class Board {
 	
 	public Color getCurrentPlayerColor() {
 		return currentPlayerColor;
+	}
+	
+	public Player getCurrentPlayer() {
+		if(currentPlayerColor == Color.WHITE) {
+			return getWhitePlayer();
+		}else {
+			return getBlackPlayer();
+		}
 	}
 	
 	public Pawn getEnPassantPawn() {
@@ -294,12 +266,4 @@ public class Board {
 			System.out.println();
 		}
 	}
-	
-	public static void main(String[] args) {
-		Board board = Board.createTestBoard();
-		System.out.println("Can white long side castle?"+" "+board.canLongSideCastle(Color.WHITE));
-		System.out.println("Can white short side castle?"+" "+board.canShortSideCastle(Color.WHITE));
-		Board.printBoard(board);
-	}
-
 }

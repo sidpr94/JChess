@@ -16,9 +16,11 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.border.LineBorder;
 
 import chess.board.Board;
 import chess.board.BoardUtil;
+import chess.move.Move;
 import chess.move.MoveState;
 import chess.pieces.Piece;
 
@@ -35,6 +37,7 @@ public class ChessPanels{
 		this.chessBoard = Board.createStandardBoard();
 		this.boardPanel = new BoardPanel();
 		this.moveState = MoveState.CHOOSE;
+		this.movePiece = null;
 		gameWindow.add(boardPanel);
 	}
 	
@@ -53,6 +56,10 @@ public class ChessPanels{
 		return chessBoard;
 	}
 	
+	private void updateBoard(Board board) {
+		this.chessBoard = board;
+	}
+	
 	private class BoardPanel extends JPanel{
 		
 		/**
@@ -60,12 +67,11 @@ public class ChessPanels{
 		 */
 		private static final long serialVersionUID = 1L;
 		
-		private final List<TilePanel> boardTiles;
+		private List<TilePanel> boardTiles;
 		
 		BoardPanel(){
 			super(new GridBagLayout());
 			setBackground(Color.BLACK);
-			this.boardTiles = generateTiles();
 		}
 		
 		List<TilePanel> generateTiles() {
@@ -81,12 +87,15 @@ public class ChessPanels{
 		
 		void drawBoard() {
 			removeAll();
+			this.boardTiles = generateTiles();
 			GridBagConstraints gb = new GridBagConstraints();
 			for(TilePanel tile : boardTiles) {
 				gb.gridx = BoardUtil.fToR[tile.getTileFile()];
 				gb.gridy = BoardUtil.rToC[tile.getTileRank()];
 				add(tile,gb);
 			}
+			validate();
+			repaint();
 		}
 		
 
@@ -104,6 +113,8 @@ public class ChessPanels{
 		
 		private Color lightTileColor = new Color(222,227, 230);
 		private Color darkTileColor = new Color(140, 162, 173);
+		private Color borderColor = new Color(255, 0, 0);
+		private Color legalMoveColor = new Color(1f,0f,0f,0.3f);
 		
 		TilePanel(int tileFile,int tileRank){	
 			super(new BorderLayout());
@@ -115,7 +126,9 @@ public class ChessPanels{
 				public void mouseClicked(MouseEvent e) {
 			        if(SwingUtilities.isLeftMouseButton(e)) {
 			        	if(moveState == MoveState.CHOOSE) {
-			        		
+			        		movePiece = getBoard().getPiece(getTileFile(),getTileRank());
+			        		moveState = MoveState.MOVE;
+			        		boardPanel.drawBoard();
 			        	}
 			        }
 			    }
@@ -128,6 +141,27 @@ public class ChessPanels{
 			}else {
 				this.setBackground((getTileFile() % 2) == 0 ? lightTileColor : darkTileColor);
 			}
+			setMoveTileColor();
+			setLegalMoveColor();
+		}
+		
+		private void setMoveTileColor() {
+			if(movePiece != null) {
+				if((movePiece.getFile() == this.getTileFile()) && (movePiece.getRank() == this.getTileRank()) && (moveState == MoveState.MOVE)) {
+					this.setBorder(new LineBorder(borderColor,4));
+				}
+			}
+		}
+		
+		private void setLegalMoveColor() {
+			if(movePiece != null) {
+				for(Move move : movePiece.getLegalMoves(getBoard())) {
+					if((move.getMoveFile() == this.getTileFile()) && (move.getMoveRank() == this.getTileRank()) && (moveState == MoveState.MOVE)) {
+						this.setBackground(legalMoveColor);
+					}
+				}
+			}
+			
 		}
 		
 		@Override

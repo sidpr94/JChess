@@ -80,7 +80,7 @@ public class Pawn extends Piece {
 		
 		Pawn pawn = board.getEnPassantPawn();
 		
-		if(!pawn.equals(null)) {
+		if(pawn != null) {
 			int square1 = BoardUtil.getCoordinate(pawn.getFile()+1, pawn.getRank());
 			int square2 = BoardUtil.getCoordinate(pawn.getFile()-1, pawn.getRank());
 			int thisSquare = BoardUtil.getCoordinate(this.getFile(), this.getRank());
