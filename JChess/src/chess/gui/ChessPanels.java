@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Image;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -76,9 +77,10 @@ public class ChessPanels{
 		
 		List<TilePanel> generateTiles() {
 			List<TilePanel> tiles = new ArrayList<TilePanel>();
-			for(int i = 7; i > -1; i--) {
+			for(int i = (BoardUtil.RANKS-1); i > -1; i--) {
 				for(int j = 0; j < BoardUtil.FILES; j++) {
 					TilePanel tile = new TilePanel(j,i);
+					tile.drawTile();
 					tiles.add(tile);
 				}
 			}
@@ -114,7 +116,6 @@ public class ChessPanels{
 		private Color lightTileColor = new Color(222,227, 230);
 		private Color darkTileColor = new Color(140, 162, 173);
 		private Color borderColor = new Color(255, 0, 0);
-		private Color legalMoveColor = new Color(1f,0f,0f,0.3f);
 		
 		TilePanel(int tileFile,int tileRank){	
 			super(new BorderLayout());
@@ -135,14 +136,18 @@ public class ChessPanels{
 			});
 		}
 		
+		private void drawTile() {
+			//assignTileColor();
+			setMoveTileColor();
+			setLegalMoveDot();
+		}
+		
 		private void assignTileColor() {
 			if((getTileRank() % 2) == 0) {
 				this.setBackground((getTileFile() % 2) == 0 ? darkTileColor : lightTileColor);
 			}else {
 				this.setBackground((getTileFile() % 2) == 0 ? lightTileColor : darkTileColor);
 			}
-			setMoveTileColor();
-			setLegalMoveColor();
 		}
 		
 		private void setMoveTileColor() {
@@ -153,11 +158,18 @@ public class ChessPanels{
 			}
 		}
 		
-		private void setLegalMoveColor() {
+		private void setLegalMoveDot() {
 			if(movePiece != null) {
+				ImageIcon ogDot = new ImageIcon("images/greendot.png");
+				Image dot = ogDot.getImage();
+				Image scaledDot = dot.getScaledInstance(40, 40, Image.SCALE_SMOOTH);
+				
 				for(Move move : movePiece.getLegalMoves(getBoard())) {
+					ImageIcon legalMoveDot = new ImageIcon(scaledDot);
+					JLabel greenDot = new JLabel(legalMoveDot,SwingConstants.CENTER);
+					greenDot.setPreferredSize(new Dimension(10,10));
 					if((move.getMoveFile() == this.getTileFile()) && (move.getMoveRank() == this.getTileRank()) && (moveState == MoveState.MOVE)) {
-						this.setBackground(legalMoveColor);
+						this.add(greenDot);
 					}
 				}
 			}
@@ -169,7 +181,7 @@ public class ChessPanels{
             return new Dimension(80, 80);
         }
 		
-		public JLabel pieceIcon() {
+		private JLabel pieceIcon() {
 			
 			Piece piece = getBoard().getPiece(getTileFile(), getTileRank());
 			ImageIcon pieceImage = new ImageIcon("images/"+piece.getPieceColor().getColorString()+piece.getPieceType().getPieceTypeString()+".png");
