@@ -1,5 +1,6 @@
 package chess.pieces;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import chess.Color;
@@ -16,7 +17,7 @@ public class NoPiece extends Piece {
 	@Override
 	public List<Move> getLegalMoves(Board board) {
 		// TODO Auto-generated method stub
-		return null;
+		return new ArrayList<Move>();
 	}
 
 	@Override
