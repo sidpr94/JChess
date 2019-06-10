@@ -14,8 +14,32 @@ public enum MoveState {
 			return null;
 		}
 	},
-	MOVE,
-	DONE;
+	MOVE {
+		@Override
+		public MoveState previousState() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public MoveState nextState() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+	},
+	DONE {
+		@Override
+		public MoveState previousState() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public MoveState nextState() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+	};
 	
 	public abstract MoveState previousState();
 	public abstract MoveState nextState();
