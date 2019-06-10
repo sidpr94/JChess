@@ -38,7 +38,7 @@ public class Queen extends Piece {
 			}
 		}
 		
-		return board.movesToCheck(legalMoves);
+		return legalMoves;
 	}
 
 	@Override

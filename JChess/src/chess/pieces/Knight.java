@@ -38,7 +38,7 @@ public class Knight extends Piece {
 				}
 			}
 		}
-		return board.movesToCheck(legalMoves);
+		return legalMoves;
 	}
 
 	@Override

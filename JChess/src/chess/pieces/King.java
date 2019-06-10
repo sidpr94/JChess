@@ -46,7 +46,7 @@ public class King extends Piece {
 			legalMoves.add(new LongSideCastleMove(this, board));
 		}
 		// TODO Auto-generated method stub
-		return board.movesToCheck(legalMoves);
+		return legalMoves;
 	}
 
 	public boolean isInCheck(Board board) {

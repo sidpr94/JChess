@@ -22,7 +22,9 @@ import javax.swing.border.LineBorder;
 import chess.board.Board;
 import chess.board.BoardUtil;
 import chess.move.Move;
+import chess.move.MoveState;
 import chess.pieces.Piece;
+import chess.pieces.PieceType;
 
 public class ChessPanels{
 
@@ -30,11 +32,13 @@ public class ChessPanels{
 	private final BoardPanel boardPanel;
 	private Board chessBoard;
 	private Piece movePiece;
+	private MoveState moveState;
 
 	public ChessPanels() {
 		this.gameWindow = new JFrame("Sid's Chess App");
 		this.chessBoard = Board.createStandardBoard();
 		this.boardPanel = new BoardPanel();
+		this.moveState = MoveState.CHOOSE;
 		this.movePiece = null;
 		gameWindow.add(boardPanel);
 	}
@@ -52,6 +56,10 @@ public class ChessPanels{
 
 	private Board getBoard() {
 		return chessBoard;
+	}
+	
+	private void updateBoard(Board board) {
+		this.chessBoard = board;
 	}
 	
 	private class BoardPanel extends JPanel{
@@ -119,7 +127,23 @@ public class ChessPanels{
 			addMouseListener(new MouseAdapter() {
 				public void mouseClicked(MouseEvent e) {
 					if(SwingUtilities.isLeftMouseButton(e)) {
-						movePiece = getBoard().getPiece(getTileFile(),getTileRank());
+						if(moveState == MoveState.CHOOSE) {
+							movePiece = getBoard().getPiece(getTileFile(),getTileRank());
+						}
+						moveState = moveState.nextState(getTileFile(),getTileRank(),movePiece,getBoard());
+						System.out.println("Tile Coord: "+movePiece.getFile()+", "+movePiece.getRank());
+						System.out.println("Move State: "+moveState.toString());
+						System.out.println("Piece Type: "+movePiece.getPieceType().getPieceTypeString());
+						if(moveState == MoveState.DONE) {
+							for(Move move : movePiece.getLegalMoves(getBoard())) {
+								if(tileFile == move.getMoveFile() && tileRank == move.getMoveRank()) {
+									System.out.println("SUP");
+									updateBoard(move.execute());
+								}
+							}
+							moveState = moveState.nextState(tileFile, tileRank, movePiece, getBoard());
+						}
+						Board.printBoard(getBoard());
 						boardPanel.drawBoard();
 					}
 				}
@@ -172,8 +196,10 @@ public class ChessPanels{
 		private JLabel pieceIcon() {
 
 			Piece piece = getBoard().getPiece(getTileFile(), getTileRank());
-			ImageIcon pieceImage = new ImageIcon("images/"+piece.getPieceColor().getColorString()+piece.getPieceType().getPieceTypeString()+".png");
-
+			ImageIcon pieceImage = null;
+			if(piece.getPieceType() != PieceType.EMPTY) {
+				pieceImage = new ImageIcon("images/"+piece.getPieceColor().getColorString()+piece.getPieceType().getPieceTypeString()+".png");
+			}
 			JLabel label = new JLabel(pieceImage,SwingConstants.CENTER);
 			label.setPreferredSize(new Dimension(80,80));
 

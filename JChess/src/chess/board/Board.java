@@ -38,7 +38,7 @@ public class Board {
 		this.board = createGameBoard(builder);
 		activeWhitePieces = setActivePieces(builder.boardConfig,Color.WHITE);
 		activeBlackPieces = setActivePieces(builder.boardConfig,Color.BLACK);
-		allActivePieces = Stream.concat(activeWhitePieces.stream(), activeBlackPieces.stream()).collect(Collectors.toList());
+		allActivePieces = Stream.concat(Stream.concat(activeWhitePieces.stream(), activeBlackPieces.stream()),setActivePieces(builder.boardConfig,Color.EMPTY).stream()).collect(Collectors.toList());
 		this.allCapturedPieces = builder.capturedPieces;
 		//this.capturedWhitePieces = this.allCapturedPieces.stream().filter(piece -> piece.getPieceColor() == Color.WHITE).collect(Collectors.toList());
 		//this.capturedBlackPieces = this.allCapturedPieces.stream().filter(piece -> piece.getPieceColor() == Color.BLACK).collect(Collectors.toList());

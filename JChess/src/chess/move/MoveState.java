@@ -1,47 +1,50 @@
 package chess.move;
 
+import chess.board.Board;
+import chess.pieces.Piece;
+import chess.pieces.PieceType;
+
 public enum MoveState {
 	CHOOSE {
-		@Override
-		public MoveState previousState() {
-			// TODO Auto-generated method stub
-			return null;
-		}
 
 		@Override
-		public MoveState nextState() {
+		public MoveState nextState(int tileFile, int tileRank, Piece movePiece, Board board) {
 			// TODO Auto-generated method stub
-			return null;
+			if(movePiece == null || movePiece.getPieceType() == PieceType.EMPTY) {
+				return CHOOSE;
+			}else {
+				return MOVE;
+			}
 		}
 	},
 	MOVE {
-		@Override
-		public MoveState previousState() {
-			// TODO Auto-generated method stub
-			return null;
-		}
 
 		@Override
-		public MoveState nextState() {
+		public MoveState nextState(int tileFile, int tileRank, Piece movePiece, Board board) {
 			// TODO Auto-generated method stub
-			return null;
+			if(movePiece == null) {
+				return CHOOSE;
+			}else {
+				for(Move move : movePiece.getLegalMoves(board)) {
+					if(tileFile == move.getMoveFile() && tileRank == move.getMoveRank()) {
+						return DONE;
+					}else {
+						return CHOOSE;
+					}
+				}
+				return CHOOSE;
+			}
 		}
 	},
 	DONE {
-		@Override
-		public MoveState previousState() {
-			// TODO Auto-generated method stub
-			return null;
-		}
 
 		@Override
-		public MoveState nextState() {
+		public MoveState nextState(int tileFile, int tileRank, Piece movePiece, Board board) {
 			// TODO Auto-generated method stub
-			return null;
+			return CHOOSE;
 		}
 	};
 	
-	public abstract MoveState previousState();
-	public abstract MoveState nextState();
+	public abstract MoveState nextState(int tileFile, int tileRank, Piece movePiece,Board board);
 	
 }

@@ -38,7 +38,7 @@ public class Rook extends Piece {
 			}
 		}
 		
-		return board.movesToCheck(legalMoves);
+		return legalMoves;
 	}
 
 	@Override

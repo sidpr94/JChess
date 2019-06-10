@@ -71,7 +71,7 @@ public class Pawn extends Piece {
 				}
 			}
 		}
-		return board.movesToCheck(legalMoves);
+		return legalMoves;
 	}
 	
 	private boolean canEnPassant(Board board) {

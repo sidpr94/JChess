@@ -18,7 +18,7 @@ public class DoublePawnMove extends Move {
 	@Override
 	public Board execute() {
 		Board currentBoard = this.getBoard();
-		List<Piece> activePieces = currentBoard.getActiveBlackPieces();
+		List<Piece> activePieces = currentBoard.getAllActivePieces();
 		Builder builder = new Builder();
 		for(Piece piece : activePieces) {
 			if(piece.equals(this.getMovePiece())) {
