@@ -22,7 +22,6 @@ import javax.swing.border.LineBorder;
 import chess.board.Board;
 import chess.board.BoardUtil;
 import chess.move.Move;
-import chess.move.MoveState;
 import chess.pieces.Piece;
 
 public class ChessPanels{
@@ -31,13 +30,11 @@ public class ChessPanels{
 	private final BoardPanel boardPanel;
 	private Board chessBoard;
 	private Piece movePiece;
-	private MoveState moveState;
 	
 	public ChessPanels() {
 		this.gameWindow = new JFrame("Sid's Chess App");
 		this.chessBoard = Board.createStandardBoard();
 		this.boardPanel = new BoardPanel();
-		this.moveState = MoveState.CHOOSE;
 		this.movePiece = null;
 		gameWindow.add(boardPanel);
 	}
@@ -55,10 +52,6 @@ public class ChessPanels{
 	
 	private Board getBoard() {
 		return chessBoard;
-	}
-	
-	private void updateBoard(Board board) {
-		this.chessBoard = board;
 	}
 	
 	private class BoardPanel extends JPanel{
@@ -126,18 +119,14 @@ public class ChessPanels{
 			addMouseListener(new MouseAdapter() {
 				public void mouseClicked(MouseEvent e) {
 			        if(SwingUtilities.isLeftMouseButton(e)) {
-			        	if(moveState == MoveState.CHOOSE) {
-			        		movePiece = getBoard().getPiece(getTileFile(),getTileRank());
-			        		moveState = MoveState.MOVE;
-			        		boardPanel.drawBoard();
-			        	}
+		        		movePiece = getBoard().getPiece(getTileFile(),getTileRank());
+		        		boardPanel.drawBoard();
 			        }
 			    }
 			});
 		}
 		
 		private void drawTile() {
-			//assignTileColor();
 			setMoveTileColor();
 			setLegalMoveDot();
 		}
@@ -151,24 +140,24 @@ public class ChessPanels{
 		}
 		
 		private void setMoveTileColor() {
-			if(movePiece != null) {
-				if((movePiece.getFile() == this.getTileFile()) && (movePiece.getRank() == this.getTileRank()) && (moveState == MoveState.MOVE)) {
+			if(movePiece != null && movePiece.getPieceColor() == getBoard().getCurrentPlayerColor()) {
+				if((movePiece.getFile() == this.getTileFile()) && (movePiece.getRank() == this.getTileRank())) {
 					this.setBorder(new LineBorder(borderColor,4));
 				}
 			}
 		}
 		
 		private void setLegalMoveDot() {
-			if(movePiece != null) {
+			if(movePiece != null && movePiece.getPieceColor() == getBoard().getCurrentPlayerColor()) {
 				ImageIcon ogDot = new ImageIcon("images/greendot.png");
 				Image dot = ogDot.getImage();
-				Image scaledDot = dot.getScaledInstance(40, 40, Image.SCALE_SMOOTH);
+				Image scaledDot = dot.getScaledInstance(30, 30, Image.SCALE_SMOOTH);
 				
 				for(Move move : movePiece.getLegalMoves(getBoard())) {
 					ImageIcon legalMoveDot = new ImageIcon(scaledDot);
 					JLabel greenDot = new JLabel(legalMoveDot,SwingConstants.CENTER);
 					greenDot.setPreferredSize(new Dimension(10,10));
-					if((move.getMoveFile() == this.getTileFile()) && (move.getMoveRank() == this.getTileRank()) && (moveState == MoveState.MOVE)) {
+					if((move.getMoveFile() == this.getTileFile()) && (move.getMoveRank() == this.getTileRank())) {
 						this.add(greenDot);
 					}
 				}

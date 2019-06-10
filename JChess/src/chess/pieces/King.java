@@ -14,7 +14,7 @@ import chess.move.ShortSideCastleMove;
 public class King extends Piece {
 
 	private static final int[][] VALID_MOVES = {{1,0},{-1,0},{0,1},{0,-1},{1,1},{1,-1},{-1,1},{-1,-1}};
-	
+
 	public King(Color pieceColor, int file, int rank,boolean hasMoved) {
 		super(pieceColor,file,rank,PieceType.KING,hasMoved);
 		// TODO Auto-generated constructor stub
@@ -22,49 +22,45 @@ public class King extends Piece {
 
 	@Override
 	public List<Move> getLegalMoves(Board board) {
-		
+
 		List<Move> legalMoves = new ArrayList<Move>();
-		if(!isInCheck(board)) {
-			for(int[] validMove : VALID_MOVES) {
-				
-				int file = this.getFile() + validMove[0];
-				int rank = this.getRank() + validMove[1];
-				if(BoardUtil.isValidSquare(file, rank)) {
-					if(!board.isSquareOccupied(file,rank)) {
+		for(int[] validMove : VALID_MOVES) {
+
+			int file = this.getFile() + validMove[0];
+			int rank = this.getRank() + validMove[1];
+			if(BoardUtil.isValidSquare(file, rank)) {
+				if(!board.isSquareOccupied(file,rank)) {
+					legalMoves.add(new NormalMove(file,rank,this, board));
+				}else {
+					Piece squarePiece = board.getPiece(file,rank);
+					if(this.getPieceColor() != squarePiece.getPieceColor()) {
 						legalMoves.add(new NormalMove(file,rank,this, board));
-					}else {
-						Piece squarePiece = board.getPiece(file,rank);
-						if(this.getPieceColor() != squarePiece.getPieceColor()) {
-							legalMoves.add(new NormalMove(file,rank,this, board));
-						}
 					}
 				}
 			}
-			if(board.canShortSideCastle(this.getPieceColor())) {
-				legalMoves.add(new ShortSideCastleMove(this, board));
-			}
-			if(board.canLongSideCastle(this.getPieceColor())) {
-				legalMoves.add(new LongSideCastleMove(this, board));
-			}
+		}
+		if(board.canShortSideCastle(this.getPieceColor())) {
+			legalMoves.add(new ShortSideCastleMove(this, board));
+		}
+		if(board.canLongSideCastle(this.getPieceColor())) {
+			legalMoves.add(new LongSideCastleMove(this, board));
 		}
 		// TODO Auto-generated method stub
 		return board.movesToCheck(legalMoves);
 	}
-	
+
 	public boolean isInCheck(Board board) {
 		boolean checkFlag = false;
 		for(Piece piece : board.getAllActivePieces()){
 			if(piece.getPieceColor() != this.getPieceColor()) {
 				for(Move move : piece.getLegalMoves(board)) {
-					System.out.println("Piece: "+piece.getPieceType().getPieceNotation(piece.getPieceColor())+", piece file: "+piece.getFile()+", piece rank: "+piece.getRank()+", piece coord "+BoardUtil.getCoordinate(piece.getFile(),piece.getRank()));
-					System.out.println("Move: "+move.getMoveFile()+", "+move.getMoveRank());
 					if((move.getMoveFile() == this.getFile()) & (move.getMoveRank() == this.getRank())) {
 						checkFlag = true;
 					}
 				}
 			}
 		}
-		
+
 		return checkFlag;
 	}
 
