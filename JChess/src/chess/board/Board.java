@@ -127,6 +127,10 @@ public class Board {
 			if(!(getPiece(i,rank).getPieceType() == PieceType.EMPTY)) {
 				pieceInBetween = true;
 			}
+			//King kingCheck = new King(color, i, rank, false);
+			/*if(kingCheck.isInCheck(this)) {
+				kingPassesCheck = true;
+			}*/
 		}
 		return (isRook) && (!rookHasMoved) && (!kingHasMoved) && (!pieceInBetween) && (!kingPassesCheck);
 	}
@@ -148,6 +152,11 @@ public class Board {
 			if(!(getPiece(i,rank).getPieceType() == PieceType.EMPTY)) {
 				pieceInBetween = true;
 			}
+			/*
+			King kingCheck = new King(color, i, rank, false);
+			if(kingCheck.isInCheck(this)) {
+				kingPassesCheck = true;
+			}*/
 		}
 		return (isRook) && (!rookHasMoved) && (!kingHasMoved) && (!pieceInBetween) && (!kingPassesCheck);
 	}
