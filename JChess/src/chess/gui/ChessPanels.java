@@ -129,6 +129,14 @@ public class ChessPanels{
 					if(SwingUtilities.isLeftMouseButton(e)) {
 						if(moveState == MoveState.CHOOSE) {
 							movePiece = getBoard().getPiece(getTileFile(),getTileRank());
+							boardPanel.drawBoard();
+						}else if(moveState == MoveState.MOVE) {
+							if(getBoard().getPiece(tileFile, tileRank).getPieceType() != PieceType.EMPTY && getBoard().getPiece(tileFile, tileRank).getPieceColor() == getBoard().getCurrentPlayerColor()) {
+								movePiece = getBoard().getPiece(getTileFile(), getTileRank());
+							}else if(tileFile == movePiece.getFile() && tileRank == movePiece.getRank()) {
+								movePiece = null;
+							}
+							boardPanel.drawBoard();
 						}
 						moveState = moveState.nextState(getTileFile(),getTileRank(),movePiece,getBoard());
 						System.out.println("Tile Coord: "+movePiece.getFile()+", "+movePiece.getRank());
@@ -137,14 +145,13 @@ public class ChessPanels{
 						if(moveState == MoveState.DONE) {
 							for(Move move : movePiece.getLegalMoves(getBoard())) {
 								if(tileFile == move.getMoveFile() && tileRank == move.getMoveRank()) {
-									System.out.println("SUP");
 									updateBoard(move.execute());
+									Board.printBoard(getBoard());
 								}
 							}
 							moveState = moveState.nextState(tileFile, tileRank, movePiece, getBoard());
+							boardPanel.drawBoard();
 						}
-						Board.printBoard(getBoard());
-						boardPanel.drawBoard();
 					}
 				}
 			});

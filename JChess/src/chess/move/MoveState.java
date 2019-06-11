@@ -6,7 +6,6 @@ import chess.pieces.PieceType;
 
 public enum MoveState {
 	CHOOSE {
-
 		@Override
 		public MoveState nextState(int tileFile, int tileRank, Piece movePiece, Board board) {
 			// TODO Auto-generated method stub
@@ -29,10 +28,10 @@ public enum MoveState {
 					if(tileFile == move.getMoveFile() && tileRank == move.getMoveRank()) {
 						return DONE;
 					}else {
-						return CHOOSE;
+						return MOVE;
 					}
 				}
-				return CHOOSE;
+				return MOVE;
 			}
 		}
 	},
@@ -46,5 +45,4 @@ public enum MoveState {
 	};
 	
 	public abstract MoveState nextState(int tileFile, int tileRank, Piece movePiece,Board board);
-	
 }
