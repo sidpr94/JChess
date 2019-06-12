@@ -12,7 +12,7 @@ public class PawnPromotion extends Move {
 
 	@Override
 	public Board execute() {
-		j
+		
 		return null;
 		// TODO Auto-generated method stub
 

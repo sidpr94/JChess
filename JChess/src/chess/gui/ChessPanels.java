@@ -131,7 +131,7 @@ public class ChessPanels{
 							movePiece = getBoard().getPiece(getTileFile(),getTileRank());
 							boardPanel.drawBoard();
 						}else if(moveState == MoveState.MOVE) {
-							if(getBoard().getPiece(tileFile, tileRank).getPieceType() != PieceType.EMPTY && getBoard().getPiece(tileFile, tileRank).getPieceColor() == getBoard().getCurrentPlayerColor()) {
+							if(!getBoard().getPiece(tileFile, tileRank).equals(movePiece) && getBoard().getPiece(tileFile, tileRank).getPieceType() != PieceType.EMPTY && getBoard().getPiece(tileFile, tileRank).getPieceColor() == getBoard().getCurrentPlayerColor()) {
 								movePiece = getBoard().getPiece(getTileFile(), getTileRank());
 							}else if(tileFile == movePiece.getFile() && tileRank == movePiece.getRank()) {
 								movePiece = null;
@@ -139,12 +139,10 @@ public class ChessPanels{
 							boardPanel.drawBoard();
 						}
 						moveState = moveState.nextState(getTileFile(),getTileRank(),movePiece,getBoard());
-						System.out.println("Tile Coord: "+movePiece.getFile()+", "+movePiece.getRank());
-						System.out.println("Move State: "+moveState.toString());
-						System.out.println("Piece Type: "+movePiece.getPieceType().getPieceTypeString());
 						if(moveState == MoveState.DONE) {
 							for(Move move : movePiece.getLegalMoves(getBoard())) {
 								if(tileFile == move.getMoveFile() && tileRank == move.getMoveRank()) {
+									System.out.println("SUP");
 									updateBoard(move.execute());
 									Board.printBoard(getBoard());
 								}
@@ -186,7 +184,6 @@ public class ChessPanels{
 				for(Move move : movePiece.getLegalMoves(getBoard())) {
 					ImageIcon legalMoveDot = new ImageIcon(scaledDot);
 					JLabel greenDot = new JLabel(legalMoveDot,SwingConstants.CENTER);
-					greenDot.setPreferredSize(new Dimension(10,10));
 					if((move.getMoveFile() == this.getTileFile()) && (move.getMoveRank() == this.getTileRank())) {
 						this.add(greenDot);
 					}

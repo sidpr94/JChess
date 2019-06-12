@@ -26,8 +26,7 @@ public class NormalMove extends Move {
 				builder.setPiece(piece.movePiece(this));
 			}else if(piece.getFile() == this.getMoveFile() && piece.getRank() == this.getMoveRank()){
 				builder.setPiece(new NoPiece(this.getMovePiece().getFile(), this.getMovePiece().getRank()));
-			}	
-			else {
+			}else {
 				builder.setPiece(piece);
 			}
 		}

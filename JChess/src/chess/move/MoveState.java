@@ -26,9 +26,8 @@ public enum MoveState {
 			}else {
 				for(Move move : movePiece.getLegalMoves(board)) {
 					if(tileFile == move.getMoveFile() && tileRank == move.getMoveRank()) {
+						System.out.println("SUP");
 						return DONE;
-					}else {
-						return MOVE;
 					}
 				}
 				return MOVE;
