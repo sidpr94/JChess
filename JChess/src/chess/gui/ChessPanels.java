@@ -3,11 +3,13 @@ package chess.gui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Image;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.RenderingHints;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,6 +19,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.WindowConstants;
 import javax.swing.border.LineBorder;
 
 import chess.board.Board;
@@ -45,6 +48,7 @@ public class ChessPanels{
 
 	public void show() {
 		getBoardPanel().drawBoard();
+		gameWindow.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		gameWindow.pack();
 		gameWindow.setLocationRelativeTo(null);
 		gameWindow.setVisible(true);
@@ -57,11 +61,11 @@ public class ChessPanels{
 	private Board getBoard() {
 		return chessBoard;
 	}
-	
+
 	private void updateBoard(Board board) {
 		this.chessBoard = board;
 	}
-	
+
 	private class BoardPanel extends JPanel{
 
 		/**
@@ -123,7 +127,7 @@ public class ChessPanels{
 			this.tileFile = tileFile;
 			this.tileRank = tileRank;
 			assignTileColor();
-			add(pieceIcon(),BorderLayout.CENTER);
+			pieceIcon();
 			addMouseListener(new MouseAdapter() {
 				public void mouseClicked(MouseEvent e) {
 					if(SwingUtilities.isLeftMouseButton(e)) {
@@ -142,7 +146,6 @@ public class ChessPanels{
 						if(moveState == MoveState.DONE) {
 							for(Move move : movePiece.getLegalMoves(getBoard())) {
 								if(tileFile == move.getMoveFile() && tileRank == move.getMoveRank()) {
-									System.out.println("SUP");
 									updateBoard(move.execute());
 									Board.printBoard(getBoard());
 								}
@@ -156,8 +159,7 @@ public class ChessPanels{
 		}
 
 		private void drawTile() {
-			setMoveTileColor();
-			setLegalMoveDot();
+			setMoveTileColor();	
 		}
 
 		private void assignTileColor() {
@@ -176,40 +178,41 @@ public class ChessPanels{
 			}
 		}
 
-		private void setLegalMoveDot() {
-			if(movePiece != null && movePiece.getPieceColor() == getBoard().getCurrentPlayerColor()) {
-				ImageIcon ogDot = new ImageIcon("images/greendot.png");
-				Image dot = ogDot.getImage();
-				Image scaledDot = dot.getScaledInstance(30, 30, Image.SCALE_SMOOTH);
-				for(Move move : movePiece.getLegalMoves(getBoard())) {
-					ImageIcon legalMoveDot = new ImageIcon(scaledDot);
-					JLabel greenDot = new JLabel(legalMoveDot,SwingConstants.CENTER);
-					if((move.getMoveFile() == this.getTileFile()) && (move.getMoveRank() == this.getTileRank())) {
-						this.add(greenDot);
-					}
-				}
-			}
-
-		}
-
 		@Override
 		public Dimension getPreferredSize() {
 			return new Dimension(80, 80);
 		}
 
-		private JLabel pieceIcon() {
+		@Override
+		public void paintComponent(Graphics g) {
+			super.paintComponent(g);
+			Graphics2D g2 = (Graphics2D) g;
+			g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+			g2.setColor(Color.GREEN);
+			int r = 30;
+			int width = (this.getWidth() - r)/2;
+			int height = (this.getHeight() - r)/2;
+			if(movePiece != null && movePiece.getPieceColor() == getBoard().getCurrentPlayerColor()) {
+				for(Move move : movePiece.getLegalMoves(getBoard())) {
+					if((move.getMoveFile() == this.getTileFile()) && (move.getMoveRank() == this.getTileRank())) {
+						g2.fillOval(width,height,r,r);
+					}
+				}
+			}
+		}
+
+		private void pieceIcon() {
 
 			Piece piece = getBoard().getPiece(getTileFile(), getTileRank());
 			ImageIcon pieceImage = null;
 			if(piece.getPieceType() != PieceType.EMPTY) {
 				pieceImage = new ImageIcon("images/"+piece.getPieceColor().getColorString()+piece.getPieceType().getPieceTypeString()+".png");
+				JLabel label = new JLabel(pieceImage,SwingConstants.CENTER);
+				label.setPreferredSize(new Dimension(80,80));
+				label.setVerticalAlignment(SwingConstants.CENTER);
+				label.setOpaque(false);
+				this.add(label, BorderLayout.CENTER);
 			}
-			JLabel label = new JLabel(pieceImage,SwingConstants.CENTER);
-			label.setPreferredSize(new Dimension(80,80));
-
-			label.setVerticalAlignment(SwingConstants.CENTER);
-
-			return label;
 		}
 
 		private int getTileFile() {
