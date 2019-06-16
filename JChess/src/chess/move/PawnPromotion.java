@@ -3,6 +3,8 @@ package chess.move;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.util.List;
 
 import javax.swing.ImageIcon;
@@ -27,6 +29,10 @@ public class PawnPromotion extends Move implements Runnable{
 	public Board moveBoard;
 	JFrame frame;
 	boolean isAttack;
+	Object lock = new Object();
+	boolean pieceChosen = false;
+	Thread newThread;
+	JFrame gameWindow;
 
 	public PawnPromotion(int file, int rank, Piece piece, Board board,boolean isAttack) {
 		super(file, rank, piece, board);
@@ -47,52 +53,67 @@ public class PawnPromotion extends Move implements Runnable{
 		Piece chosenPiece;
 
 		public buttonListener(Piece piece) {
-			chosenPiece = piece;
+			this.chosenPiece = piece;
 		}
 
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
 			// TODO Auto-generated method stub
-			synchronized(moveBoard) {
-				frame.dispose();
-				if(isAttack) {
-					Board currentBoard = getBoard();
-					List<Piece> activePieces = currentBoard.getAllActivePieces();
-					Builder builder = new Builder();
-					for(Piece piece : activePieces) {
-						if(piece.equals(getMovePiece())) {
-							builder.setPiece(chosenPiece);
-						}else if(piece.getFile() == getMoveFile() && piece.getRank() == getMoveRank()) {
-							builder.setPiece(new NoPiece(getMovePiece().getFile(), getMovePiece().getRank()));	
-							builder.setCapturedPiece(piece);
-						}else {
-							builder.setPiece(piece);
-						}
-					}
-					builder.setMover(BoardUtil.oppositeColor(currentBoard.getCurrentPlayerColor()));
-					builder.enPassantPawn(null);
+			SwingUtilities.invokeLater(new Runnable() {
 
-					moveBoard = builder.execute();
-				}else {
-					Board currentBoard = getBoard();
-					List<Piece> activePieces = currentBoard.getAllActivePieces();
-					Builder builder = new Builder();
-					for(Piece piece : activePieces) {
-						if(piece.equals(getMovePiece())) {
-							builder.setPiece(chosenPiece);
-						}else if(piece.getFile() == getMoveFile() && piece.getRank() == getMoveRank()){
-							builder.setPiece(new NoPiece(getMovePiece().getFile(), getMovePiece().getRank()));
-						}else {
-							builder.setPiece(piece);
-						}
-					}
-					builder.setMover(BoardUtil.oppositeColor(currentBoard.getCurrentPlayerColor()));
-					builder.enPassantPawn(null);
-
-					moveBoard = builder.execute();
-					this.notifyAll();
+				@Override
+				public void run() {
+					// TODO Auto-generated method stub
+					frame.dispose();
 				}
+				
+			});
+			if(isAttack) {
+				Board currentBoard = getBoard();
+				List<Piece> activePieces = currentBoard.getAllActivePieces();
+				Builder builder = new Builder();
+				for(Piece piece : activePieces) {
+					if(piece.equals(getMovePiece())) {
+						builder.setPiece(chosenPiece);
+					}else if(piece.getFile() == getMoveFile() && piece.getRank() == getMoveRank()) {
+						builder.setPiece(new NoPiece(getMovePiece().getFile(), getMovePiece().getRank()));	
+						builder.setCapturedPiece(piece);
+					}else {
+						builder.setPiece(piece);
+					}
+				}
+				builder.setMover(BoardUtil.oppositeColor(currentBoard.getCurrentPlayerColor()));
+				builder.enPassantPawn(null);
+
+				moveBoard = builder.execute();
+			}else {
+				Board currentBoard = getBoard();
+				List<Piece> activePieces = currentBoard.getAllActivePieces();
+				Builder builder = new Builder();
+				for(Piece piece : activePieces) {
+					if(piece.equals(getMovePiece())) {
+						builder.setPiece(chosenPiece);
+					}else if(piece.getFile() == getMoveFile() && piece.getRank() == getMoveRank()){
+						builder.setPiece(new NoPiece(getMovePiece().getFile(), getMovePiece().getRank()));
+					}else {
+						builder.setPiece(piece);
+					}
+				}
+				builder.setMover(BoardUtil.oppositeColor(currentBoard.getCurrentPlayerColor()));
+				builder.enPassantPawn(null);
+				
+				moveBoard = builder.execute();
+
 			}
+			
+			PawnPromotion.this.newThread.start();
+			
+			synchronized(lock) {
+				lock.notifyAll();
+			}
+			
+			pieceChosen = true;
+
 		}
 
 	}
@@ -131,18 +152,85 @@ public class PawnPromotion extends Move implements Runnable{
 				buttons.add(bishop);
 
 				frame.add(buttons);
+				frame.addWindowListener(new WindowListener() {
+
+					@Override
+					public void windowActivated(WindowEvent arg0) {
+						// TODO Auto-generated method stub
+						
+					}
+
+					@Override
+					public void windowClosed(WindowEvent arg0) {
+						// TODO Auto-generated method stub
+
+					}
+
+					@Override
+					public void windowClosing(WindowEvent arg0) {
+						// TODO Auto-generated method stub
+						PawnPromotion.this.gameWindow.setEnabled(true);
+						PawnPromotion.this.gameWindow.requestFocus();
+						pieceChosen = true;
+						synchronized(lock) {
+							lock.notifyAll();
+						}
+					}
+
+					@Override
+					public void windowDeactivated(WindowEvent arg0) {
+						// TODO Auto-generated method stub
+						
+					}
+
+					@Override
+					public void windowDeiconified(WindowEvent arg0) {
+						// TODO Auto-generated method stub
+						
+					}
+
+					@Override
+					public void windowIconified(WindowEvent arg0) {
+						// TODO Auto-generated method stub
+						
+					}
+
+					@Override
+					public void windowOpened(WindowEvent arg0) {
+						// TODO Auto-generated method stub
+						
+					}
+					
+				});
 
 				frame.pack();
 				frame.setLocationRelativeTo(null);
 				frame.setVisible(true);
 				frame.requestFocus();
-
 			}
-
 		});
-
-		synchronized(moveBoard){
-			while(moveBoard == null);
+		
+		while(!pieceChosen) {
+			synchronized(lock) {
+				try {
+					lock.wait();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
 		}
 	}
+	
+	public void setNewThread(Thread thread) {
+		this.newThread = thread;
+	}
+
+	public void setGameWindow(JFrame gameWindow) {
+		// TODO Auto-generated method stub
+		this.gameWindow = gameWindow;
+		
+	}
+
+
 }

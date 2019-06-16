@@ -50,7 +50,7 @@ public class ChessPanels{
 
 	public void show() {
 		getBoardPanel().drawBoard();
-		gameWindow.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+		gameWindow.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		gameWindow.pack();
 		gameWindow.setLocationRelativeTo(null);
 		gameWindow.setVisible(true);
@@ -164,8 +164,20 @@ public class ChessPanels{
 										if(tileFile == move.getMoveFile() && tileRank == move.getMoveRank() && !getBoard().movesToCheck(move)) {
 											if(move.getClass().getName().endsWith("PawnPromotion")){
 												PawnPromotion specialMove = (PawnPromotion) move;
+												Thread newThread = new Thread(new Runnable() {
+
+													@Override
+													public void run() {
+														// TODO Auto-generated method stub
+														gameWindow.setEnabled(true);
+														updateBoard(specialMove.execute());
+													}
+												});
+												specialMove.setNewThread(newThread);
+												specialMove.setGameWindow(gameWindow);
 												Thread t = new Thread(specialMove);
 												t.start();
+												gameWindow.setEnabled(false);
 											}else {
 												updateBoard(move.execute());
 											}
