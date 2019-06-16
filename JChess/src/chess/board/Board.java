@@ -1,5 +1,6 @@
 package chess.board;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -9,6 +10,7 @@ import java.util.stream.Stream;
 
 import chess.Color;
 import chess.move.Move;
+import chess.move.NormalMove;
 import chess.pieces.Bishop;
 import chess.pieces.King;
 import chess.pieces.Knight;
@@ -27,8 +29,10 @@ public class Board {
 	private final List<Piece> activeWhitePieces;
 	private final List<Piece> activeBlackPieces;
 	private final List<Piece> allCapturedPieces;
-	//private final List<Piece> capturedWhitePieces;
-	//private final List<Piece> capturedBlackPieces;
+	private final List<Piece> capturedWhitePieces;
+	private final List<Piece> capturedBlackPieces;
+	private final List<Move> whiteLegalMoves;
+	private final List<Move> blackLegalMoves;
 	private final Player whitePlayer;
 	private final Player blackPlayer;
 	private final Pawn enPassantPawn;
@@ -40,11 +44,13 @@ public class Board {
 		activeBlackPieces = setActivePieces(builder.boardConfig,Color.BLACK);
 		allActivePieces = Stream.concat(Stream.concat(activeWhitePieces.stream(), activeBlackPieces.stream()),setActivePieces(builder.boardConfig,Color.EMPTY).stream()).collect(Collectors.toList());
 		this.allCapturedPieces = builder.capturedPieces;
-		//this.capturedWhitePieces = this.allCapturedPieces.stream().filter(piece -> piece.getPieceColor() == Color.WHITE).collect(Collectors.toList());
-		//this.capturedBlackPieces = this.allCapturedPieces.stream().filter(piece -> piece.getPieceColor() == Color.BLACK).collect(Collectors.toList());
-		this.whitePlayer = new Player(this, activeWhitePieces, Color.WHITE);
-		this.blackPlayer = new Player(this,activeBlackPieces,Color.BLACK);
+		this.capturedWhitePieces = this.allCapturedPieces.stream().filter(piece -> piece.getPieceColor() == Color.WHITE).collect(Collectors.toList());
+		this.capturedBlackPieces = this.allCapturedPieces.stream().filter(piece -> piece.getPieceColor() == Color.BLACK).collect(Collectors.toList());
+		this.whitePlayer = new Player(this,Color.WHITE);
+		this.blackPlayer = new Player(this,Color.BLACK);
 		this.enPassantPawn = builder.enPassantPawn;
+		whiteLegalMoves = setLegalMoves(activeWhitePieces);
+		blackLegalMoves = setLegalMoves(activeBlackPieces);
 		this.currentPlayerColor = builder.mover;
 	}
 	
@@ -122,17 +128,12 @@ public class Board {
         boolean isRook = piece.getPieceType() == PieceType.ROOK;
 		boolean kingHasMoved = king.hasMoved();
 		boolean pieceInBetween = false;
-		boolean kingPassesCheck = false;
 		for(int i = king.getFile()+1; i < BoardUtil.FILES-1;i++) {
 			if(!(getPiece(i,rank).getPieceType() == PieceType.EMPTY)) {
 				pieceInBetween = true;
 			}
-			//King kingCheck = new King(color, i, rank, false);
-			/*if(kingCheck.isInCheck(this)) {
-				kingPassesCheck = true;
-			}*/
 		}
-		return (isRook) && (!rookHasMoved) && (!kingHasMoved) && (!pieceInBetween) && (!kingPassesCheck);
+		return (isRook) && (!rookHasMoved) && (!kingHasMoved) && (!pieceInBetween);
 	}
 	
 	public boolean canLongSideCastle(Color color) {
@@ -140,36 +141,40 @@ public class Board {
 		if(color == Color.BLACK) {
 			rank = 7;
 		}
-		List<Piece> activePieces = getPieceByColor(color);
-		King king = (King) activePieces.stream().filter(piece -> piece.getPieceType() == PieceType.KING).collect(Collectors.toList()).get(0);
+		Player player = getPlayerByColor(color);
+		King king = player.getKing();
 		Piece piece = getPiece(0,rank);
 		boolean rookHasMoved = piece.hasMoved();
 		boolean isRook = piece.getPieceType().equals(PieceType.ROOK);
 		boolean kingHasMoved = king.hasMoved();
 		boolean pieceInBetween = false;
-		boolean kingPassesCheck = false;
 		for(int i = king.getFile()-1; i > 0;i--) {
-			if(!(getPiece(i,rank).getPieceType() == PieceType.EMPTY)) {
+			if(getPiece(i,rank).getPieceType() != PieceType.EMPTY) {
 				pieceInBetween = true;
 			}
-			/*
-			King kingCheck = new King(color, i, rank, false);
-			if(kingCheck.isInCheck(this)) {
-				kingPassesCheck = true;
-			}*/
 		}
-		return (isRook) && (!rookHasMoved) && (!kingHasMoved) && (!pieceInBetween) && (!kingPassesCheck);
+		return (isRook) && (!rookHasMoved) && (!kingHasMoved) && (!pieceInBetween);
 	}
 	
-	public List<Move> movesToCheck(List<Move> legalMoves) {
-		for(Move move : legalMoves) {
-			Board moveBoard = move.execute();
-			Player currentPlayer = moveBoard.getCurrentPlayer();
-			if(currentPlayer.getKing().isInCheck(moveBoard)) {
-				legalMoves.remove(move);
-			};
+	public boolean movesToCheck(Move move) {
+		boolean passesCheck = false;
+		King king = move.getBoard().getCurrentPlayer().getKing();
+		if(move.getClass().getName().endsWith("ShortSideCastleMove")){
+			NormalMove nextToKing = new NormalMove(king.getFile()+1, king.getRank(), king, move.getBoard());
+			Player nextToKingPlayer = new Player(nextToKing.execute(),move.getBoard().getCurrentPlayerColor());
+			passesCheck = nextToKingPlayer.isInCheck();
+		}else if(move.getClass().getName().endsWith("LongSideCastleMove")) {
+			NormalMove nextToKing = new NormalMove(king.getFile()-1, king.getRank(), king, move.getBoard());
+			Player nextToKingPlayer = new Player(nextToKing.execute(),move.getBoard().getCurrentPlayerColor());
+			passesCheck = nextToKingPlayer.isInCheck();
 		}
-		return legalMoves;
+		if(move.getClass().getName().endsWith("PawnPromotion")) {
+			return passesCheck || move.getBoard().getCurrentPlayer().isInCheck();
+		}else {
+			Board moveBoard = move.execute();
+			Player player = new Player(moveBoard,move.getBoard().getCurrentPlayerColor());
+			return player.isInCheck() || passesCheck;
+		}
 	}
 	
 	public List<Piece> getAllActivePieces(){
@@ -188,7 +193,6 @@ public class Board {
 		return allCapturedPieces;
 	}
 	
-	/*
 	public List<Piece> getCapturedWhitePieces(){
 		return capturedWhitePieces;
 	}
@@ -196,7 +200,6 @@ public class Board {
 	public List<Piece> getCapturedBlackPieces(){
 		return  capturedBlackPieces;
 	}
-	*/
 	
 	public Player getWhitePlayer() {
 		return whitePlayer;
@@ -204,6 +207,14 @@ public class Board {
 	
 	public Player getBlackPlayer() {
 		return blackPlayer;
+	}
+	
+	public List<Move> getWhiteLegalMoves(){
+		return whiteLegalMoves;
+	}
+	
+	public List<Move> getBlackLegalMoves(){
+		return blackLegalMoves;
 	}
 	
 	public Color getCurrentPlayerColor() {
@@ -225,14 +236,31 @@ public class Board {
 		return allActivePieces.stream().filter(piece -> piece.getPieceColor() == color).collect(Collectors.toList());
 	}
 	
+	public Player getPlayerByColor(Color color) {
+		if(color == Color.WHITE) {
+			return getWhitePlayer();
+		}else {
+			return getBlackPlayer();
+		}
+	}
+	
 	public List<Piece> setActivePieces(HashMap<Integer,Piece> boardConfig,Color color){
 		return boardConfig.values().stream().filter(piece -> piece.getPieceColor() == color).collect(Collectors.toList());
+	}
+	
+	public List<Move> setLegalMoves(List<Piece> activePieces){
+		List<Move> moves = new ArrayList<Move>();
+		for(Piece piece : activePieces) {
+			moves.addAll(piece.getLegalMoves(this));
+		}
+		return moves;
+		
 	}
 	
 	public static class Builder {
 		
 		HashMap<Integer,Piece> boardConfig = new HashMap<Integer,Piece>();
-		List<Piece> capturedPieces;
+		List<Piece> capturedPieces = new ArrayList<Piece>();
 		Color mover;
 		Pawn enPassantPawn;
 		public Builder() {};

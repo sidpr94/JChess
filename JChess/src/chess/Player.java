@@ -1,3 +1,4 @@
+
 package chess;
 
 import java.util.List;
@@ -5,6 +6,7 @@ import java.util.stream.Collectors;
 
 import chess.Color;
 import chess.board.Board;
+import chess.move.Move;
 import chess.pieces.King;
 import chess.pieces.Piece;
 import chess.pieces.PieceType;
@@ -15,15 +17,10 @@ public class Player {
 	private List<Piece> activePieces;
 	private Color color;
 	
-	public Player(Board board,List<Piece> activePieces,Color color){
+	public Player(Board board,Color color){
 		this.board = board;
-		this.activePieces = activePieces;
+		this.activePieces = board.getPieceByColor(color);
 		this.color = color;
-	}
-	
-	public boolean isCheckMate() {
-		King king = getKing();
-		return (king.getLegalMoves(board).isEmpty() && king.isInCheck(board));
 	}
 	
 	public List<Piece> getActivePieces(){
@@ -35,9 +32,43 @@ public class Player {
 		return (King) king.get(0);
 	}
 	
+	public boolean isInCheck() {
+		List<Move> enemyMoves;
+		King king = getKing();
+		boolean isInCheck = false;
+		if(getColor() == Color.WHITE) {
+			enemyMoves = board.getBlackLegalMoves();
+		}else {
+			enemyMoves = board.getWhiteLegalMoves();		
+		}
+		for(Move move : enemyMoves) {
+			if(move.getMoveFile() == king.getFile() && move.getMoveRank() == king.getRank()) {
+				isInCheck = true;
+			}
+		}
+		return isInCheck;
+	}
+	
 	public Color getColor() {
 		return color;
 	};
+	
+	public boolean isCheckMate() {
+		List<Move> moves;
+		if(getColor() == Color.WHITE) {
+			moves = board.getWhiteLegalMoves();
+		}else {
+			moves = board.getBlackLegalMoves();		
+		}
+		boolean isCheckMate = true;
+		for(Move move : moves) {
+			if(!board.movesToCheck(move)) {
+				isCheckMate = false;
+			}
+		}
+		return isCheckMate;
+	}
+	
 }
 
 

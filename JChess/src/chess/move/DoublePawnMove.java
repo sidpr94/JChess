@@ -23,7 +23,9 @@ public class DoublePawnMove extends Move {
 		Builder builder = new Builder();
 		for(Piece piece : activePieces) {
 			if(piece.equals(this.getMovePiece())) {
-				builder.setPiece(piece.movePiece(this));
+				Pawn movedPawn = (Pawn) piece.movePiece(this);
+				builder.setPiece(movedPawn);
+				builder.enPassantPawn(movedPawn);
 			}else if(piece.getFile() == this.getMoveFile() && piece.getRank() == this.getMoveRank()){
 				builder.setPiece(new NoPiece(this.getMovePiece().getFile(), this.getMovePiece().getRank()));
 			}	
@@ -32,8 +34,6 @@ public class DoublePawnMove extends Move {
 			}
 		}
 		builder.setMover(BoardUtil.oppositeColor(currentBoard.getCurrentPlayerColor()));
-		
-		builder.enPassantPawn((Pawn) this.getMovePiece());
 		
 		return builder.execute();
 		// TODO Auto-generated method stub

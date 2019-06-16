@@ -12,7 +12,7 @@ import chess.pieces.Piece;
 public class LongSideCastleMove extends Move{
 
 	public LongSideCastleMove(Piece piece, Board board) {
-		super(piece.getFile(),piece.getRank(), piece, board);
+		super(piece.getFile()-2,piece.getRank(), piece, board);
 		// TODO Auto-generated constructor stub
 	}
 
@@ -30,12 +30,13 @@ public class LongSideCastleMove extends Move{
 		
 		for(Piece piece : activePieces) {
 			if(piece.equals(this.getMovePiece())) {
-				builder.setPiece(piece.movePiece(new NormalMove(this.getMoveFile()-2,this.getMoveRank(),this.getMovePiece(),currentBoard)));
+				builder.setPiece(piece.movePiece(this));
 			}else if(piece.getFile() == this.getMoveFile() && piece.getRank() == this.getMoveRank()){
 				builder.setPiece(new NoPiece(this.getMovePiece().getFile(), this.getMovePiece().getRank()));
 			}
 			else if(piece.equals(rook)){
-				builder.setPiece(piece.movePiece(new NormalMove(piece.getFile()+3,piece.getRank(),piece,currentBoard)));
+				builder.setPiece(rook.movePiece(new NormalMove(rook.getFile()+3,rook.getRank(),rook,currentBoard)));
+			}else if(piece.getFile() == rook.getFile()+3 && piece.getRank() == rook.getRank()) {
 				builder.setPiece(new NoPiece(rook.getFile(),rook.getRank()));
 			}else {
 				builder.setPiece(piece);

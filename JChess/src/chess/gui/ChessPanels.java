@@ -16,6 +16,7 @@ import java.util.List;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
@@ -26,6 +27,7 @@ import chess.board.Board;
 import chess.board.BoardUtil;
 import chess.move.Move;
 import chess.move.MoveState;
+import chess.move.PawnPromotion;
 import chess.pieces.Piece;
 import chess.pieces.PieceType;
 
@@ -64,6 +66,18 @@ public class ChessPanels{
 
 	private void updateBoard(Board board) {
 		this.chessBoard = board;
+		getBoardPanel().drawBoard();
+		if(board.getCurrentPlayer().isCheckMate()) {
+			Object[] options = {"New Game",
+			"Exit"};
+			int value = JOptionPane.showOptionDialog(gameWindow, BoardUtil.oppositeColor(board.getCurrentPlayerColor())+" won by checkmate!", "Game Over!", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
+			if(value == JOptionPane.YES_OPTION) {
+				this.chessBoard = Board.createStandardBoard();
+				getBoardPanel().drawBoard();
+			}else {
+				gameWindow.dispose();
+			}
+		}
 	}
 
 	private class BoardPanel extends JPanel{
@@ -131,27 +145,36 @@ public class ChessPanels{
 			addMouseListener(new MouseAdapter() {
 				public void mouseClicked(MouseEvent e) {
 					if(SwingUtilities.isLeftMouseButton(e)) {
-						if(moveState == MoveState.CHOOSE) {
-							movePiece = getBoard().getPiece(getTileFile(),getTileRank());
-							boardPanel.drawBoard();
-						}else if(moveState == MoveState.MOVE) {
-							if(!getBoard().getPiece(tileFile, tileRank).equals(movePiece) && getBoard().getPiece(tileFile, tileRank).getPieceType() != PieceType.EMPTY && getBoard().getPiece(tileFile, tileRank).getPieceColor() == getBoard().getCurrentPlayerColor()) {
-								movePiece = getBoard().getPiece(getTileFile(), getTileRank());
-							}else if(tileFile == movePiece.getFile() && tileRank == movePiece.getRank()) {
-								movePiece = null;
+						if(!getBoard().getCurrentPlayer().isCheckMate()) {
+							if(moveState == MoveState.CHOOSE) {
+								movePiece = getBoard().getPiece(getTileFile(),getTileRank());
+								boardPanel.drawBoard();
+							}else if(moveState == MoveState.MOVE) {
+								if(!getBoard().getPiece(tileFile, tileRank).equals(movePiece) && getBoard().getPiece(tileFile, tileRank).getPieceType() != PieceType.EMPTY && getBoard().getPiece(tileFile, tileRank).getPieceColor() == getBoard().getCurrentPlayerColor()) {
+									movePiece = getBoard().getPiece(getTileFile(), getTileRank());
+								}else if(tileFile == movePiece.getFile() && tileRank == movePiece.getRank()) {
+									movePiece = null;
+								}
+								boardPanel.drawBoard();
 							}
-							boardPanel.drawBoard();
-						}
-						moveState = moveState.nextState(getTileFile(),getTileRank(),movePiece,getBoard());
-						if(moveState == MoveState.DONE) {
-							for(Move move : movePiece.getLegalMoves(getBoard())) {
-								if(tileFile == move.getMoveFile() && tileRank == move.getMoveRank()) {
-									updateBoard(move.execute());
-									Board.printBoard(getBoard());
+							moveState = moveState.nextState(getTileFile(),getTileRank(),movePiece,getBoard());
+							if(moveState == MoveState.DONE) {
+								if(getBoard().getCurrentPlayer().getColor() == movePiece.getPieceColor()) {
+									for(Move move : movePiece.getLegalMoves(getBoard())) {
+										if(tileFile == move.getMoveFile() && tileRank == move.getMoveRank() && !getBoard().movesToCheck(move)) {
+											if(move.getClass().getName().endsWith("PawnPromotion")){
+												PawnPromotion specialMove = (PawnPromotion) move;
+												Thread t = new Thread(specialMove);
+												t.start();
+											}else {
+												updateBoard(move.execute());
+											}
+										}
+										//	Board.printBoard(getBoard());
+									}
 								}
 							}
-							moveState = moveState.nextState(tileFile, tileRank, movePiece, getBoard());
-							boardPanel.drawBoard();
+							moveState = moveState.nextState(tileFile, tileRank, movePiece, getBoard());			
 						}
 					}
 				}
@@ -188,13 +211,13 @@ public class ChessPanels{
 			super.paintComponent(g);
 			Graphics2D g2 = (Graphics2D) g;
 			g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-			g2.setColor(Color.GREEN);
+			g2.setColor(new Color(0.407f, 0.545f, 0.538f, 0.76f));
 			int r = 30;
 			int width = (this.getWidth() - r)/2;
 			int height = (this.getHeight() - r)/2;
 			if(movePiece != null && movePiece.getPieceColor() == getBoard().getCurrentPlayerColor()) {
 				for(Move move : movePiece.getLegalMoves(getBoard())) {
-					if((move.getMoveFile() == this.getTileFile()) && (move.getMoveRank() == this.getTileRank())) {
+					if((move.getMoveFile() == this.getTileFile()) && (move.getMoveRank() == this.getTileRank()) && !getBoard().movesToCheck(move)) {
 						g2.fillOval(width,height,r,r);
 					}
 				}

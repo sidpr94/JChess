@@ -5,6 +5,8 @@ import java.util.List;
 import chess.board.Board;
 import chess.board.BoardUtil;
 import chess.board.Board.Builder;
+import chess.pieces.NoPiece;
+import chess.pieces.Pawn;
 import chess.pieces.Piece;
 
 public class EnPassantMove extends Move {
@@ -19,11 +21,15 @@ public class EnPassantMove extends Move {
 		Board currentBoard = this.getBoard();
 		List<Piece> activePieces = currentBoard.getAllActivePieces();
 		Builder builder = new Builder();
+		Pawn enPassantPawn = currentBoard.getEnPassantPawn();
+		builder.setCapturedPiece(enPassantPawn);
 		for(Piece piece : activePieces) {
 			if(piece.equals(this.getMovePiece())) {
 				builder.setPiece(piece.movePiece(this));
-			}else if (piece.equals(currentBoard.getEnPassantPawn())) {
-				builder.setCapturedPiece(piece);
+			}else if(piece.getFile() == this.getMoveFile() && piece.getRank() == this.getMoveRank()) {
+				builder.setPiece(new NoPiece(this.getMovePiece().getFile(), this.getMovePiece().getRank()));				
+			}else if (piece.equals(enPassantPawn)) {
+				builder.setPiece(new NoPiece(enPassantPawn.getFile(), enPassantPawn.getRank()));
 			}else {
 				builder.setPiece(piece);
 			}

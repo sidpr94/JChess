@@ -49,21 +49,6 @@ public class King extends Piece {
 		return legalMoves;
 	}
 
-	public boolean isInCheck(Board board) {
-		boolean checkFlag = false;
-		for(Piece piece : board.getAllActivePieces()){
-			if(piece.getPieceColor() != this.getPieceColor()) {
-				for(Move move : piece.getLegalMoves(board)) {
-					if((move.getMoveFile() == this.getFile()) & (move.getMoveRank() == this.getRank())) {
-						checkFlag = true;
-					}
-				}
-			}
-		}
-
-		return checkFlag;
-	}
-
 	@Override
 	public King movePiece(Move move) {
 		// TODO Auto-generated method stub

@@ -25,9 +25,7 @@ public class AttackMove extends Move {
 			if(piece.equals(this.getMovePiece())) {
 				builder.setPiece(piece.movePiece(this));
 			}else if(piece.getFile() == this.getMoveFile() && piece.getRank() == this.getMoveRank()) {
-				builder.setPiece(new NoPiece(this.getMovePiece().getFile(), this.getMovePiece().getRank()));				
-			}
-			else if (piece.equals(currentBoard.getPiece(getMoveFile(), getMoveRank()))) {
+				builder.setPiece(new NoPiece(this.getMovePiece().getFile(), this.getMovePiece().getRank()));	
 				builder.setCapturedPiece(piece);
 			}else {
 				builder.setPiece(piece);
