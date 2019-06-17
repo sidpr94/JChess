@@ -62,15 +62,17 @@ public class Pawn extends Piece {
 					attackRank = this.getRank() - attackMove[1];
 
 				}
-				if(board.isSquareOccupied(attackFile, attackRank) && (board.getPiece(attackFile, attackRank).getPieceColor() != this.getPieceColor())) {
-					if(attackRank == 7 || attackRank == 0) {
-						legalMoves.add(new PawnPromotion(attackFile, attackRank, this, board,true));	
-					}else {
-						legalMoves.add(new AttackMove(attackFile,attackRank,this,board));
+				if(BoardUtil.isValidSquare(attackFile, attackRank)) {
+					if(board.isSquareOccupied(attackFile, attackRank) && (board.getPiece(attackFile, attackRank).getPieceColor() != this.getPieceColor())) {
+						if(attackRank == 7 || attackRank == 0) {
+							legalMoves.add(new PawnPromotion(attackFile, attackRank, this, board,true));	
+						}else {
+							legalMoves.add(new AttackMove(attackFile,attackRank,this,board));
+						}
 					}
-				}
-				if(canEnPassant(board) && (board.getPiece(attackFile,this.getRank()).equals(board.getEnPassantPawn()))) {
-					legalMoves.add(new EnPassantMove(attackFile,attackRank,this, board));
+					if(canEnPassant(board) && (board.getPiece(attackFile,this.getRank()).equals(board.getEnPassantPawn()))) {
+						legalMoves.add(new EnPassantMove(attackFile,attackRank,this, board));
+					}
 				}
 			}
 		}

@@ -42,6 +42,7 @@ public class ChessPanels{
 	public ChessPanels() {
 		this.gameWindow = new JFrame("Sid's Chess App");
 		this.chessBoard = Board.createStandardBoard();
+		//this.chessBoard = Board.createTestBoard();
 		this.boardPanel = new BoardPanel();
 		this.moveState = MoveState.CHOOSE;
 		this.movePiece = null;
@@ -70,7 +71,17 @@ public class ChessPanels{
 		if(board.getCurrentPlayer().isCheckMate()) {
 			Object[] options = {"New Game",
 			"Exit"};
-			int value = JOptionPane.showOptionDialog(gameWindow, BoardUtil.oppositeColor(board.getCurrentPlayerColor())+" won by checkmate!", "Game Over!", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
+			int value = JOptionPane.showOptionDialog(gameWindow, BoardUtil.oppositeColor(board.getCurrentPlayerColor()).toString()+" wins by checkmate!", "Game Over!", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
+			if(value == JOptionPane.YES_OPTION) {
+				this.chessBoard = Board.createStandardBoard();
+				getBoardPanel().drawBoard();
+			}else {
+				gameWindow.dispose();
+			}
+		}else if(board.getCurrentPlayer().isStaleMate()) {
+			Object[] options = {"New Game",
+			"Exit"};
+			int value = JOptionPane.showOptionDialog(gameWindow, BoardUtil.oppositeColor(board.getCurrentPlayerColor()).toString()+" draws by stalemate!", "Game Over!", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
 			if(value == JOptionPane.YES_OPTION) {
 				this.chessBoard = Board.createStandardBoard();
 				getBoardPanel().drawBoard();

@@ -105,6 +105,31 @@ public class Board {
 		return builder.execute();
 		
 	}
+	
+	public static Board createTestBoard() {
+		Builder builder = new Builder();
+						
+		for(int i = 0; i < BoardUtil.RANKS;i++) {
+			for(int j = 0; j < BoardUtil.FILES;j++) {
+				if(i == 5 && j == 7) {
+					builder.setPiece(new King(Color.WHITE,7, 5, true));
+				}else if(i == 6 && j == 7) {
+					builder.setPiece(new Pawn(Color.WHITE,7,6,true));
+				}else if(i == 7 && j == 7) {
+					builder.setPiece(new King(Color.BLACK,7,7,true));
+				}else if(i == 0 && j == 0){
+					builder.setPiece(new Queen(Color.WHITE,0,0));
+				}else {
+					builder.setPiece(new NoPiece(j,i));
+				}
+			}
+		}
+				
+		builder.setMover(Color.WHITE);
+		builder.enPassantPawn(null);
+		
+		return builder.execute();
+	}
 
 	public boolean isSquareOccupied(int file, int rank) {
 		// TODO Auto-generated method stub

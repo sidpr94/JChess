@@ -53,20 +53,28 @@ public class Player {
 		return color;
 	};
 	
-	public boolean isCheckMate() {
+	public boolean hasNoLegalMoves() {
 		List<Move> moves;
 		if(getColor() == Color.WHITE) {
 			moves = board.getWhiteLegalMoves();
 		}else {
 			moves = board.getBlackLegalMoves();		
 		}
-		boolean isCheckMate = true;
+		boolean noLegalMoves = true;
 		for(Move move : moves) {
 			if(!board.movesToCheck(move)) {
-				isCheckMate = false;
+				noLegalMoves = false;
 			}
 		}
-		return isCheckMate;
+		return noLegalMoves;
+	}
+	public boolean isCheckMate() {
+		return hasNoLegalMoves() && isInCheck();
+	}
+	
+	public boolean isStaleMate() {
+		
+		return hasNoLegalMoves() && !isInCheck();
 	}
 	
 }
