@@ -6,6 +6,7 @@ import java.util.List;
 import chess.Color;
 import chess.board.Board;
 import chess.board.BoardUtil;
+import chess.move.AttackMove;
 import chess.move.LongSideCastleMove;
 import chess.move.Move;
 import chess.move.NormalMove;
@@ -34,7 +35,7 @@ public class King extends Piece {
 				}else {
 					Piece squarePiece = board.getPiece(file,rank);
 					if(this.getPieceColor() != squarePiece.getPieceColor()) {
-						legalMoves.add(new NormalMove(file,rank,this, board));
+						legalMoves.add(new AttackMove(file,rank,this, board));
 					}
 				}
 			}

@@ -10,6 +10,7 @@ import chess.move.AttackMove;
 import chess.move.DoublePawnMove;
 import chess.move.EnPassantMove;
 import chess.move.Move;
+import chess.move.MoveType;
 import chess.move.NormalMove;
 import chess.move.PawnPromotion;
 
@@ -48,7 +49,7 @@ public class Pawn extends Piece {
 					legalMoves.add(new DoublePawnMove(file,rank2,this, board));
 				}
 				if(rank == 7 || rank == 0) {
-					legalMoves.add(new PawnPromotion(file, rank, this, board,false));
+					legalMoves.add(new PawnPromotion(file, rank, this, board,MoveType.Normal));
 				}
 			}
 			for(int[] attackMove : VALID_ATTACK_MOVES) {
@@ -65,7 +66,7 @@ public class Pawn extends Piece {
 				if(BoardUtil.isValidSquare(attackFile, attackRank)) {
 					if(board.isSquareOccupied(attackFile, attackRank) && (board.getPiece(attackFile, attackRank).getPieceColor() != this.getPieceColor())) {
 						if(attackRank == 7 || attackRank == 0) {
-							legalMoves.add(new PawnPromotion(attackFile, attackRank, this, board,true));	
+							legalMoves.add(new PawnPromotion(attackFile, attackRank, this, board,MoveType.Attack));	
 						}else {
 							legalMoves.add(new AttackMove(attackFile,attackRank,this,board));
 						}

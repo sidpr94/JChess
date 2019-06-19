@@ -9,13 +9,15 @@ public abstract class Move {
 	private int moveFile;
 	private Piece movingPiece;
 	private Board board;
+	private MoveType moveType;
 	
-	public Move(int moveFile,int moveRank,Piece movingPiece,Board board) {
+	public Move(int moveFile,int moveRank,Piece movingPiece,Board board,MoveType moveType) {
 		// TODO Auto-generated constructor stub
 		this.moveFile = moveFile;
 		this.moveRank = moveRank;
 		this.movingPiece = movingPiece;
 		this.board = board;
+		this.moveType = moveType;
 	}
 	
 	public int getMoveFile() {
@@ -39,6 +41,10 @@ public abstract class Move {
 	
 	public Board getBoard() {
 		return board;
+	}
+	
+	public MoveType getMoveType() {
+		return moveType;
 	}
 	
 	public abstract Board execute();

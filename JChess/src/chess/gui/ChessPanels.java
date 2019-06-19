@@ -3,6 +3,7 @@ package chess.gui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
@@ -38,15 +39,20 @@ public class ChessPanels{
 	private Board chessBoard;
 	private Piece movePiece;
 	private MoveState moveState;
+	private MoveLog moveLog;
 
 	public ChessPanels() {
 		this.gameWindow = new JFrame("Sid's Chess App");
 		this.chessBoard = Board.createStandardBoard();
 		//this.chessBoard = Board.createTestBoard();
+		JPanel homeOfAllPanels = new JPanel(new BorderLayout());
 		this.boardPanel = new BoardPanel();
 		this.moveState = MoveState.CHOOSE;
 		this.movePiece = null;
-		gameWindow.add(boardPanel);
+		this.moveLog = new MoveLog();
+		homeOfAllPanels.add(boardPanel, BorderLayout.CENTER);
+		homeOfAllPanels.add(moveLog.getPane(),BorderLayout.EAST);
+		gameWindow.add(homeOfAllPanels);
 	}
 
 	public void show() {
@@ -102,7 +108,7 @@ public class ChessPanels{
 
 		BoardPanel(){
 			super(new GridBagLayout());
-			setBackground(Color.BLACK);
+			setBackground(new Color(38,36,33));
 		}
 
 		List<TilePanel> generateTiles() {
@@ -182,6 +188,7 @@ public class ChessPanels{
 														// TODO Auto-generated method stub
 														gameWindow.setEnabled(true);
 														updateBoard(specialMove.execute());
+														moveLog.addMove(specialMove);
 													}
 												});
 												specialMove.setNewThread(newThread);
@@ -191,6 +198,7 @@ public class ChessPanels{
 												gameWindow.setEnabled(false);
 											}else {
 												updateBoard(move.execute());
+												moveLog.addMove(move);
 											}
 										}
 										//	Board.printBoard(getBoard());
@@ -244,6 +252,14 @@ public class ChessPanels{
 						g2.fillOval(width,height,r,r);
 					}
 				}
+			}
+			g2.setColor(this.getBackground() == this.darkTileColor ? lightTileColor : darkTileColor);
+			g2.setFont(new Font(Font.DIALOG, Font.BOLD, 15));
+			if(getTileFile() == 7) {
+				g2.drawString(Integer.toString(BoardUtil.rToNo[getTileRank()]), this.getWidth()-10, 15);
+			}
+			if(getTileRank() == 0) {
+				g2.drawString(BoardUtil.fToA[getTileFile()], this.getWidth()-15, this.getHeight()-5);				
 			}
 		}
 

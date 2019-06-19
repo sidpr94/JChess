@@ -12,7 +12,7 @@ import chess.pieces.Piece;
 public class ShortSideCastleMove extends Move {
 
 	public ShortSideCastleMove(Piece piece, Board board) {
-		super(piece.getFile()+2, piece.getRank(), piece, board);
+		super(piece.getFile()+2, piece.getRank(), piece, board,MoveType.Castle);
 		// TODO Auto-generated constructor stub
 	}
 

@@ -315,7 +315,7 @@ public class Board {
 		for(int j = 7; j > -1; j--) {
 			for(int i =0; i < 8; i++) {
 				Piece piece = board.getPiece(i, j);
-				System.out.print(piece.getPieceType().getPieceNotation(piece.getPieceColor())+" ");
+				System.out.print(piece.getPieceType().getPiecePrint(piece.getPieceColor())+" ");
 			}
 			System.out.println();
 		}

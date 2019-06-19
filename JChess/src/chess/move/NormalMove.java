@@ -11,7 +11,7 @@ import chess.pieces.Piece;
 public class NormalMove extends Move {
 	
 	public NormalMove(int moveFile, int moveRank, Piece movingPiece,Board board) {
-		super(moveFile, moveRank, movingPiece,board);
+		super(moveFile, moveRank, movingPiece,board,MoveType.Normal);
 		// TODO Auto-generated constructor stub
 	}
 

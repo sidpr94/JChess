@@ -12,7 +12,7 @@ import chess.pieces.Piece;
 public class DoublePawnMove extends Move {
 
 	public DoublePawnMove(int file, int rank, Pawn pawn, Board board) {
-		super(file, rank, pawn, board);
+		super(file, rank, pawn, board,MoveType.Normal);
 		// TODO Auto-generated constructor stub
 	}
 

@@ -27,17 +27,16 @@ import chess.pieces.Rook;
 public class PawnPromotion extends Move implements Runnable{
 
 	public Board moveBoard;
-	JFrame frame;
-	boolean isAttack;
-	Object lock = new Object();
-	boolean pieceChosen = false;
-	Thread newThread;
-	JFrame gameWindow;
+	private JFrame frame;
+	private Object lock = new Object();
+	private boolean pieceChosen = false;
+	private Thread newThread;
+	private JFrame gameWindow;
+	private Piece pieceChosen1;
 
-	public PawnPromotion(int file, int rank, Piece piece, Board board,boolean isAttack) {
-		super(file, rank, piece, board);
+	public PawnPromotion(int file, int rank, Piece piece, Board board,MoveType moveType) {
+		super(file, rank, piece, board,moveType);
 		frame = new JFrame("Promote Pawn To:");
-		this.isAttack = isAttack;
 		// TODO Auto-generated constructor stub
 	}
 
@@ -68,7 +67,8 @@ public class PawnPromotion extends Move implements Runnable{
 				}
 				
 			});
-			if(isAttack) {
+			PawnPromotion.this.pieceChosen1 = this.chosenPiece;
+			if(getMoveType() == MoveType.Attack) {
 				Board currentBoard = getBoard();
 				List<Piece> activePieces = currentBoard.getAllActivePieces();
 				Builder builder = new Builder();
@@ -231,6 +231,8 @@ public class PawnPromotion extends Move implements Runnable{
 		this.gameWindow = gameWindow;
 		
 	}
-
-
+	
+	public Piece getPieceChosen() {
+		return pieceChosen1;
+	}
 }

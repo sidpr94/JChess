@@ -12,7 +12,7 @@ import chess.pieces.Piece;
 public class EnPassantMove extends Move {
 
 	public EnPassantMove(int file, int rank, Piece piece, Board board) {
-		super(file, rank, piece, board);
+		super(file, rank, piece, board,MoveType.Normal);
 		// TODO Auto-generated constructor stub
 	}
 

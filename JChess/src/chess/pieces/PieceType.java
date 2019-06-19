@@ -17,11 +17,15 @@ public enum PieceType {
 		this.pieceTypeString = type;
 	}
 	
-	public String getPieceNotation(Color color) {
+	public String getPiecePrint(Color color) {
 		return color == Color.WHITE ? this.pieceTypeString : this.pieceTypeString.toLowerCase();
 	}
 	
 	public String getPieceTypeString() {
 		return pieceTypeString;
+	}
+	
+	public String getPieceNotation() {
+		return this.pieceTypeString.replace("P", "");
 	}
 }

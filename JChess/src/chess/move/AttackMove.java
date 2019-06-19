@@ -11,7 +11,7 @@ import chess.pieces.Piece;
 public class AttackMove extends Move {
 
 	public AttackMove(int file, int rank, Piece piece, Board board) {
-		super(file, rank, piece, board);
+		super(file, rank, piece, board,MoveType.Attack);
 		// TODO Auto-generated constructor stub
 	}
 
