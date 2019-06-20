@@ -20,6 +20,7 @@ public class NormalMove extends Move {
 		// TODO Auto-generated method stub
 		Board currentBoard = this.getBoard();
 		List<Piece> activePieces = currentBoard.getAllActivePieces();
+		List<Piece> capturedPieces = currentBoard.getAllCapturedPieces();
 		Builder builder = new Builder();
 		for(Piece piece : activePieces) {
 			if(piece.equals(this.getMovePiece())) {
@@ -32,6 +33,7 @@ public class NormalMove extends Move {
 		}
 		builder.setMover(BoardUtil.oppositeColor(currentBoard.getCurrentPlayerColor()));
 		builder.enPassantPawn(null);
+		builder.setCapturedPiece(capturedPieces);
 		
 		return builder.execute();
 	}

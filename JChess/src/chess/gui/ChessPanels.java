@@ -24,6 +24,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.border.LineBorder;
 
+import chess.Alliance;
 import chess.board.Board;
 import chess.board.BoardUtil;
 import chess.move.Move;
@@ -40,6 +41,7 @@ public class ChessPanels{
 	private Piece movePiece;
 	private MoveState moveState;
 	private MoveLog moveLog;
+	private CapturedPiecePanel capturePanel;
 
 	public ChessPanels() {
 		this.gameWindow = new JFrame("Sid's Chess App");
@@ -49,9 +51,13 @@ public class ChessPanels{
 		this.boardPanel = new BoardPanel();
 		this.moveState = MoveState.CHOOSE;
 		this.movePiece = null;
+		this.capturePanel = new CapturedPiecePanel(Alliance.BLACK);
 		this.moveLog = new MoveLog();
+		JPanel wardenOfTheEast = new JPanel(new BorderLayout());
+		wardenOfTheEast.add(capturePanel.getCapturedPiecePanel(), BorderLayout.NORTH);
+		wardenOfTheEast.add(moveLog.getPane(), BorderLayout.CENTER);
 		homeOfAllPanels.add(boardPanel, BorderLayout.CENTER);
-		homeOfAllPanels.add(moveLog.getPane(),BorderLayout.EAST);
+		homeOfAllPanels.add(wardenOfTheEast,BorderLayout.EAST);
 		gameWindow.add(homeOfAllPanels);
 	}
 
@@ -199,9 +205,11 @@ public class ChessPanels{
 											}else {
 												updateBoard(move.execute());
 												moveLog.addMove(move);
+
 											}
+											//Board.printBoard(getBoard());
+											//System.out.println("");
 										}
-										//	Board.printBoard(getBoard());
 									}
 								}
 							}

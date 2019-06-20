@@ -20,13 +20,15 @@ public class AttackMove extends Move {
 		
 		Board currentBoard = this.getBoard();
 		List<Piece> activePieces = currentBoard.getAllActivePieces();
+		List<Piece> capturedPieces = this.getBoard().getAllCapturedPieces();
 		Builder builder = new Builder();
 		for(Piece piece : activePieces) {
 			if(piece.equals(this.getMovePiece())) {
 				builder.setPiece(piece.movePiece(this));
 			}else if(piece.getFile() == this.getMoveFile() && piece.getRank() == this.getMoveRank()) {
 				builder.setPiece(new NoPiece(this.getMovePiece().getFile(), this.getMovePiece().getRank()));	
-				builder.setCapturedPiece(piece);
+				capturedPieces.add(piece);
+				builder.setCapturedPiece(capturedPieces);
 			}else {
 				builder.setPiece(piece);
 			}

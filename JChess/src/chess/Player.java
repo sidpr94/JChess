@@ -4,7 +4,7 @@ package chess;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import chess.Color;
+import chess.Alliance;
 import chess.board.Board;
 import chess.move.Move;
 import chess.pieces.King;
@@ -15,9 +15,9 @@ public class Player {
 	
 	private Board board;
 	private List<Piece> activePieces;
-	private Color color;
+	private Alliance color;
 	
-	public Player(Board board,Color color){
+	public Player(Board board,Alliance color){
 		this.board = board;
 		this.activePieces = board.getPieceByColor(color);
 		this.color = color;
@@ -36,7 +36,7 @@ public class Player {
 		List<Move> enemyMoves;
 		King king = getKing();
 		boolean isInCheck = false;
-		if(getColor() == Color.WHITE) {
+		if(getColor() == Alliance.WHITE) {
 			enemyMoves = board.getBlackLegalMoves();
 		}else {
 			enemyMoves = board.getWhiteLegalMoves();		
@@ -49,13 +49,13 @@ public class Player {
 		return isInCheck;
 	}
 	
-	public Color getColor() {
+	public Alliance getColor() {
 		return color;
 	};
 	
 	public boolean hasNoLegalMoves() {
 		List<Move> moves;
-		if(getColor() == Color.WHITE) {
+		if(getColor() == Alliance.WHITE) {
 			moves = board.getWhiteLegalMoves();
 		}else {
 			moves = board.getBlackLegalMoves();		

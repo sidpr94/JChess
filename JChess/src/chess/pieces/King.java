@@ -3,7 +3,7 @@ package chess.pieces;
 import java.util.ArrayList;
 import java.util.List;
 
-import chess.Color;
+import chess.Alliance;
 import chess.board.Board;
 import chess.board.BoardUtil;
 import chess.move.AttackMove;
@@ -16,7 +16,7 @@ public class King extends Piece {
 
 	private static final int[][] VALID_MOVES = {{1,0},{-1,0},{0,1},{0,-1},{1,1},{1,-1},{-1,1},{-1,-1}};
 
-	public King(Color pieceColor, int file, int rank,boolean hasMoved) {
+	public King(Alliance pieceColor, int file, int rank,boolean hasMoved) {
 		super(pieceColor,file,rank,PieceType.KING,hasMoved);
 		// TODO Auto-generated constructor stub
 	}

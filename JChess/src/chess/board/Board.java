@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import chess.Color;
+import chess.Alliance;
 import chess.move.Move;
 import chess.move.NormalMove;
 import chess.pieces.Bishop;
@@ -36,18 +36,18 @@ public class Board {
 	private final Player whitePlayer;
 	private final Player blackPlayer;
 	private final Pawn enPassantPawn;
-	private final Color currentPlayerColor;
+	private final Alliance currentPlayerColor;
 	
 	private Board(Builder builder) {
 		this.board = createGameBoard(builder);
-		activeWhitePieces = setActivePieces(builder.boardConfig,Color.WHITE);
-		activeBlackPieces = setActivePieces(builder.boardConfig,Color.BLACK);
-		allActivePieces = Stream.concat(Stream.concat(activeWhitePieces.stream(), activeBlackPieces.stream()),setActivePieces(builder.boardConfig,Color.EMPTY).stream()).collect(Collectors.toList());
+		activeWhitePieces = setActivePieces(builder.boardConfig,Alliance.WHITE);
+		activeBlackPieces = setActivePieces(builder.boardConfig,Alliance.BLACK);
+		allActivePieces = Stream.concat(Stream.concat(activeWhitePieces.stream(), activeBlackPieces.stream()),setActivePieces(builder.boardConfig,Alliance.EMPTY).stream()).collect(Collectors.toList());
 		this.allCapturedPieces = builder.capturedPieces;
-		this.capturedWhitePieces = this.allCapturedPieces.stream().filter(piece -> piece.getPieceColor() == Color.WHITE).collect(Collectors.toList());
-		this.capturedBlackPieces = this.allCapturedPieces.stream().filter(piece -> piece.getPieceColor() == Color.BLACK).collect(Collectors.toList());
-		this.whitePlayer = new Player(this,Color.WHITE);
-		this.blackPlayer = new Player(this,Color.BLACK);
+		this.capturedWhitePieces = this.allCapturedPieces.stream().filter(piece -> piece.getPieceColor() == Alliance.WHITE).collect(Collectors.toList());
+		this.capturedBlackPieces = this.allCapturedPieces.stream().filter(piece -> piece.getPieceColor() == Alliance.BLACK).collect(Collectors.toList());
+		this.whitePlayer = new Player(this,Alliance.WHITE);
+		this.blackPlayer = new Player(this,Alliance.BLACK);
 		this.enPassantPawn = builder.enPassantPawn;
 		whiteLegalMoves = setLegalMoves(activeWhitePieces);
 		blackLegalMoves = setLegalMoves(activeBlackPieces);
@@ -67,17 +67,17 @@ public class Board {
 		// TODO Auto-generated method stub
 		Builder builder = new Builder();
 		
-		builder.setPiece(new Rook(Color.WHITE,0, 0, false));
-		builder.setPiece(new Knight(Color.WHITE,1, 0));
-		builder.setPiece(new Bishop(Color.WHITE,2, 0));
-		builder.setPiece(new Queen(Color.WHITE,3, 0));
-		builder.setPiece(new King(Color.WHITE,4, 0, false));
-		builder.setPiece(new Bishop(Color.WHITE,5, 0));
-		builder.setPiece(new Knight(Color.WHITE,6, 0));
-		builder.setPiece(new Rook(Color.WHITE,7, 0, false));
+		builder.setPiece(new Rook(Alliance.WHITE,0, 0, false));
+		builder.setPiece(new Knight(Alliance.WHITE,1, 0));
+		builder.setPiece(new Bishop(Alliance.WHITE,2, 0));
+		builder.setPiece(new Queen(Alliance.WHITE,3, 0));
+		builder.setPiece(new King(Alliance.WHITE,4, 0, false));
+		builder.setPiece(new Bishop(Alliance.WHITE,5, 0));
+		builder.setPiece(new Knight(Alliance.WHITE,6, 0));
+		builder.setPiece(new Rook(Alliance.WHITE,7, 0, false));
 		
 		for(int i = 0; i < BoardUtil.FILES; i++) {
-			builder.setPiece(new Pawn(Color.WHITE,i, 1, false));
+			builder.setPiece(new Pawn(Alliance.WHITE,i, 1, false));
 		}
 		
 		for(int i = 2; i < 6;i++) {
@@ -87,19 +87,19 @@ public class Board {
 		}
 		
 		for(int i = 0; i < BoardUtil.FILES; i++) {
-			builder.setPiece(new Pawn(Color.BLACK,i, 6, false));
+			builder.setPiece(new Pawn(Alliance.BLACK,i, 6, false));
 		}
 		
-		builder.setPiece(new Rook(Color.BLACK,0, 7, false));
-		builder.setPiece(new Knight(Color.BLACK,1, 7));
-		builder.setPiece(new Bishop(Color.BLACK,2, 7));
-		builder.setPiece(new Queen(Color.BLACK,3, 7));
-		builder.setPiece(new King(Color.BLACK,4, 7, false));
-		builder.setPiece(new Bishop(Color.BLACK,5, 7));
-		builder.setPiece(new Knight(Color.BLACK,6, 7));
-		builder.setPiece(new Rook(Color.BLACK,7, 7, false));
+		builder.setPiece(new Rook(Alliance.BLACK,0, 7, false));
+		builder.setPiece(new Knight(Alliance.BLACK,1, 7));
+		builder.setPiece(new Bishop(Alliance.BLACK,2, 7));
+		builder.setPiece(new Queen(Alliance.BLACK,3, 7));
+		builder.setPiece(new King(Alliance.BLACK,4, 7, false));
+		builder.setPiece(new Bishop(Alliance.BLACK,5, 7));
+		builder.setPiece(new Knight(Alliance.BLACK,6, 7));
+		builder.setPiece(new Rook(Alliance.BLACK,7, 7, false));
 		
-		builder.setMover(Color.WHITE);
+		builder.setMover(Alliance.WHITE);
 		builder.enPassantPawn(null);
 		
 		return builder.execute();
@@ -112,20 +112,20 @@ public class Board {
 		for(int i = 0; i < BoardUtil.RANKS;i++) {
 			for(int j = 0; j < BoardUtil.FILES;j++) {
 				if(i == 5 && j == 7) {
-					builder.setPiece(new King(Color.WHITE,7, 5, true));
+					builder.setPiece(new King(Alliance.WHITE,7, 5, true));
 				}else if(i == 6 && j == 7) {
-					builder.setPiece(new Pawn(Color.WHITE,7,6,true));
+					builder.setPiece(new Pawn(Alliance.WHITE,7,6,true));
 				}else if(i == 7 && j == 7) {
-					builder.setPiece(new King(Color.BLACK,7,7,true));
+					builder.setPiece(new King(Alliance.BLACK,7,7,true));
 				}else if(i == 0 && j == 0){
-					builder.setPiece(new Queen(Color.WHITE,0,0));
+					builder.setPiece(new Queen(Alliance.WHITE,0,0));
 				}else {
 					builder.setPiece(new NoPiece(j,i));
 				}
 			}
 		}
 				
-		builder.setMover(Color.WHITE);
+		builder.setMover(Alliance.WHITE);
 		builder.enPassantPawn(null);
 		
 		return builder.execute();
@@ -141,9 +141,9 @@ public class Board {
 		return board.get(BoardUtil.getCoordinate(file, rank));
 	}
 	
-	public boolean canShortSideCastle(Color color) {
+	public boolean canShortSideCastle(Alliance color) {
 		int rank = 0;
-		if(color == Color.BLACK) {
+		if(color == Alliance.BLACK) {
 			rank = 7;
 		}
 		List<Piece> activePieces = getPieceByColor(color);
@@ -161,9 +161,9 @@ public class Board {
 		return (isRook) && (!rookHasMoved) && (!kingHasMoved) && (!pieceInBetween);
 	}
 	
-	public boolean canLongSideCastle(Color color) {
+	public boolean canLongSideCastle(Alliance color) {
 		int rank = 0;
-		if(color == Color.BLACK) {
+		if(color == Alliance.BLACK) {
 			rank = 7;
 		}
 		Player player = getPlayerByColor(color);
@@ -242,12 +242,12 @@ public class Board {
 		return blackLegalMoves;
 	}
 	
-	public Color getCurrentPlayerColor() {
+	public Alliance getCurrentPlayerColor() {
 		return currentPlayerColor;
 	}
 	
 	public Player getCurrentPlayer() {
-		if(currentPlayerColor == Color.WHITE) {
+		if(currentPlayerColor == Alliance.WHITE) {
 			return getWhitePlayer();
 		}else {
 			return getBlackPlayer();
@@ -257,19 +257,27 @@ public class Board {
 	public Pawn getEnPassantPawn() {
 		return enPassantPawn;
 	}
-	public List<Piece> getPieceByColor(Color color){
+	public List<Piece> getPieceByColor(Alliance color){
 		return allActivePieces.stream().filter(piece -> piece.getPieceColor() == color).collect(Collectors.toList());
 	}
 	
-	public Player getPlayerByColor(Color color) {
-		if(color == Color.WHITE) {
+	public Player getPlayerByColor(Alliance color) {
+		if(color == Alliance.WHITE) {
 			return getWhitePlayer();
 		}else {
 			return getBlackPlayer();
 		}
 	}
 	
-	public List<Piece> setActivePieces(HashMap<Integer,Piece> boardConfig,Color color){
+	public List<Move> getLegalMovesByColor(Alliance color){
+		if(color == Alliance.WHITE) {
+			return getWhiteLegalMoves();
+		}else {
+			return getBlackLegalMoves();
+		}
+	}
+	
+	public List<Piece> setActivePieces(HashMap<Integer,Piece> boardConfig,Alliance color){
 		return boardConfig.values().stream().filter(piece -> piece.getPieceColor() == color).collect(Collectors.toList());
 	}
 	
@@ -286,7 +294,7 @@ public class Board {
 		
 		HashMap<Integer,Piece> boardConfig = new HashMap<Integer,Piece>();
 		List<Piece> capturedPieces = new ArrayList<Piece>();
-		Color mover;
+		Alliance mover;
 		Pawn enPassantPawn;
 		public Builder() {};
 		
@@ -294,7 +302,7 @@ public class Board {
 			boardConfig.put(BoardUtil.getCoordinate(piece.getFile(), piece.getRank()),piece);
 		}
 		
-		public void setMover(Color color) {
+		public void setMover(Alliance color) {
 			this.mover = color;
 		}
 		
@@ -302,8 +310,8 @@ public class Board {
 			this.enPassantPawn = pawn;
 		}
 		
-		public void setCapturedPiece(Piece piece) {
-			this.capturedPieces.add(piece);
+		public void setCapturedPiece(List<Piece> pieces) {
+			this.capturedPieces = pieces;
 		}
 		
 		public Board execute() {

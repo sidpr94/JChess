@@ -2,19 +2,19 @@ package chess.pieces;
 
 import java.util.List;
 
-import chess.Color;
+import chess.Alliance;
 import chess.board.Board;
 import chess.move.Move;
 
 public abstract class Piece {
 	
-	private final Color pieceColor;
+	private final Alliance pieceColor;
 	private final int rank;
 	private final int file;
 	private final PieceType pieceType;
 	private final boolean hasMoved;
 	
-	public Piece(Color pieceColor,int file,int rank,PieceType pieceType,boolean hasMoved){
+	public Piece(Alliance pieceColor,int file,int rank,PieceType pieceType,boolean hasMoved){
 		this.pieceColor = pieceColor;
 		this.rank = rank;
 		this.file = file;
@@ -32,7 +32,7 @@ public abstract class Piece {
 		return file;
 	}
 	
-	public Color getPieceColor() {
+	public Alliance getPieceColor() {
 		return pieceColor;
 	}
 	

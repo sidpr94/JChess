@@ -3,7 +3,7 @@ package chess.pieces;
 import java.util.ArrayList;
 import java.util.List;
 
-import chess.Color;
+import chess.Alliance;
 import chess.board.Board;
 import chess.board.BoardUtil;
 import chess.move.AttackMove;
@@ -19,7 +19,7 @@ public class Pawn extends Piece {
 	private static int[] VALID_MOVE = {0,1};
 	private static int[][] VALID_ATTACK_MOVES = {{1,1},{-1,1}};
 
-	public Pawn(Color pieceColor, int file,int rank,boolean hasMoved) {
+	public Pawn(Alliance pieceColor, int file,int rank,boolean hasMoved) {
 		super(pieceColor,file,rank,PieceType.PAWN,hasMoved);
 		// TODO Auto-generated constructor stub
 	}
@@ -32,7 +32,7 @@ public class Pawn extends Piece {
 		int rank2;
 
 		List<Move> legalMoves = new ArrayList<Move>();
-		if(this.getPieceColor().equals(Color.WHITE)) {
+		if(this.getPieceColor().equals(Alliance.WHITE)) {
 			file = this.getFile() + VALID_MOVE[0];
 			rank = this.getRank() + VALID_MOVE[1];
 			rank2 = this.getRank() + 2*VALID_MOVE[1];
@@ -44,18 +44,19 @@ public class Pawn extends Piece {
 		}
 		if(BoardUtil.isValidSquare(file, rank)) {
 			if(!board.isSquareOccupied(file,rank)) {
-				legalMoves.add(new NormalMove(file,rank,this, board));
 				if(!hasMoved() && !board.isSquareOccupied(file,rank2)){
 					legalMoves.add(new DoublePawnMove(file,rank2,this, board));
 				}
 				if(rank == 7 || rank == 0) {
 					legalMoves.add(new PawnPromotion(file, rank, this, board,MoveType.Normal));
+				}else {
+					legalMoves.add(new NormalMove(file,rank,this, board));
 				}
 			}
 			for(int[] attackMove : VALID_ATTACK_MOVES) {
 				int attackFile;
 				int attackRank;
-				if(this.getPieceColor().equals(Color.WHITE)) {
+				if(this.getPieceColor().equals(Alliance.WHITE)) {
 					attackFile = this.getFile() + attackMove[0];
 					attackRank = this.getRank() + attackMove[1];
 				}else {

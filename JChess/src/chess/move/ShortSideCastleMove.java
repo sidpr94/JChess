@@ -2,7 +2,7 @@ package chess.move;
 
 import java.util.List;
 
-import chess.Color;
+import chess.Alliance;
 import chess.board.Board;
 import chess.board.BoardUtil;
 import chess.board.Board.Builder;
@@ -20,9 +20,10 @@ public class ShortSideCastleMove extends Move {
 	public Board execute() {
 		Board currentBoard = this.getBoard();
 		List<Piece> activePieces = currentBoard.getAllActivePieces();
+		List<Piece> capturedPieces = currentBoard.getAllCapturedPieces();
 		Builder builder = new Builder();
 		Piece rook = null;
-		if(this.getMovePiece().getPieceColor() == Color.WHITE) {
+		if(this.getMovePiece().getPieceColor() == Alliance.WHITE) {
 			rook = currentBoard.getPiece(7, 0);
 		}else {
 			rook = currentBoard.getPiece(7, 7);
@@ -43,6 +44,7 @@ public class ShortSideCastleMove extends Move {
 		}
 		builder.setMover(BoardUtil.oppositeColor(currentBoard.getCurrentPlayerColor()));
 		builder.enPassantPawn(null);
+		builder.setCapturedPiece(capturedPieces);
 		
 		return builder.execute();
 		// TODO Auto-generated method stub

@@ -20,6 +20,7 @@ public class DoublePawnMove extends Move {
 	public Board execute() {
 		Board currentBoard = this.getBoard();
 		List<Piece> activePieces = currentBoard.getAllActivePieces();
+		List<Piece> capturedPieces = currentBoard.getAllCapturedPieces();
 		Builder builder = new Builder();
 		for(Piece piece : activePieces) {
 			if(piece.equals(this.getMovePiece())) {
@@ -33,6 +34,7 @@ public class DoublePawnMove extends Move {
 				builder.setPiece(piece);
 			}
 		}
+		builder.setCapturedPiece(capturedPieces);
 		builder.setMover(BoardUtil.oppositeColor(currentBoard.getCurrentPlayerColor()));
 		
 		return builder.execute();

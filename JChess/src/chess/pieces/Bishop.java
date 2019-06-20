@@ -3,7 +3,7 @@ package chess.pieces;
 import java.util.ArrayList;
 import java.util.List;
 
-import chess.Color;
+import chess.Alliance;
 import chess.Direction;
 import chess.board.Board;
 import chess.board.BoardUtil;
@@ -15,7 +15,7 @@ public class Bishop extends Piece {
 
 	private static final Direction[] VALID_MOVES = {Direction.NE,Direction.SE,Direction.NW,Direction.SW};
 
-	public Bishop(Color pieceColor, int file,int rank) {
+	public Bishop(Alliance pieceColor, int file,int rank) {
 		super(pieceColor,file,rank,PieceType.BISHOP,false);
 		// TODO Auto-generated constructor stub
 	}

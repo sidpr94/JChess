@@ -3,7 +3,7 @@ package chess.pieces;
 import java.util.ArrayList;
 import java.util.List;
 
-import chess.Color;
+import chess.Alliance;
 import chess.Direction;
 import chess.board.Board;
 import chess.board.BoardUtil;
@@ -15,7 +15,7 @@ public class Rook extends Piece {
 
 	private static final Direction[] VALID_MOVES = {Direction.N,Direction.S,Direction.E,Direction.W};
 
-	public Rook(Color pieceColor, int rank, int file, boolean hasMoved) {
+	public Rook(Alliance pieceColor, int rank, int file, boolean hasMoved) {
 		super(pieceColor,rank,file, PieceType.ROOK,hasMoved);
 		// TODO Auto-generated constructor stub
 	}

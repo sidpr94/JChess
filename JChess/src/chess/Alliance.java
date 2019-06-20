@@ -1,13 +1,13 @@
 package chess;
 
-public enum Color {
+public enum Alliance {
 	WHITE ("W"),
 	BLACK ("B"),
 	EMPTY ("");
 	
 	String colorString;
 	
-	private Color(String colorString) {
+	private Alliance(String colorString) {
 		this.colorString = colorString;
 	}
 	

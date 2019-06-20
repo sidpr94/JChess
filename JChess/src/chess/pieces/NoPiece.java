@@ -3,14 +3,14 @@ package chess.pieces;
 import java.util.ArrayList;
 import java.util.List;
 
-import chess.Color;
+import chess.Alliance;
 import chess.board.Board;
 import chess.move.Move;
 
 public class NoPiece extends Piece {
 
 	public NoPiece(int file,int rank) {
-		super(Color.EMPTY,file,rank,PieceType.EMPTY,false);
+		super(Alliance.EMPTY,file,rank,PieceType.EMPTY,false);
 		// TODO Auto-generated constructor stub
 	}
 

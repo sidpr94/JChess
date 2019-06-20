@@ -1,6 +1,6 @@
 package chess.pieces;
 
-import chess.Color;
+import chess.Alliance;
 
 public enum PieceType {
 	PAWN ("P"),
@@ -17,8 +17,8 @@ public enum PieceType {
 		this.pieceTypeString = type;
 	}
 	
-	public String getPiecePrint(Color color) {
-		return color == Color.WHITE ? this.pieceTypeString : this.pieceTypeString.toLowerCase();
+	public String getPiecePrint(Alliance color) {
+		return color == Alliance.WHITE ? this.pieceTypeString : this.pieceTypeString.toLowerCase();
 	}
 	
 	public String getPieceTypeString() {
