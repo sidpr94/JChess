@@ -1,13 +1,17 @@
 package chess.gui;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 
+import javax.swing.BorderFactory;
+import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -18,7 +22,8 @@ import chess.board.BoardUtil;
 
 public class MoveLog {
 	
-	private final JScrollPane pane;
+	private final JPanel pane;
+	private final JScrollPane scrollPane;
 	private final JTable table;
 	
 	public MoveLog() {
@@ -34,9 +39,12 @@ public class MoveLog {
 		});
 		
 		((DefaultTableModel) table.getModel()).setColumnIdentifiers(new Object[] {"Row number","White Moves","Black Moves"});
-		pane = new JScrollPane(table);
-		pane.setPreferredSize(new Dimension(80*4,80*8));
-		pane.getViewport().setBackground(new Color(38,36,33));
+		pane = new JPanel(new BorderLayout());
+		scrollPane = new JScrollPane(table);
+		scrollPane.setPreferredSize(new Dimension(80*4,(80*6)));
+		scrollPane.setBorder(BorderFactory.createEmptyBorder());
+		scrollPane.getViewport().setBackground(new Color(38,36,33));
+		scrollPane.setHorizontalScrollBar(null);
 		table.setBackground(new Color(38,36,33));
 		table.setForeground(new Color(222,227, 230));
 		table.setFont(new Font(Font.DIALOG, Font.BOLD, 15));
@@ -51,9 +59,10 @@ public class MoveLog {
 		table.setRowHeight(30);
 		table.setIntercellSpacing(new Dimension(5,0));
 		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		pane.add(scrollPane,BorderLayout.CENTER);
 	};
 	
-	public JScrollPane getPane() {
+	public JPanel getPane() {
 		return this.pane;
 	}
 
@@ -70,9 +79,9 @@ public class MoveLog {
 			@Override
 			public void run() {
 				// TODO Auto-generated method stub
-				JScrollBar bar = pane.getVerticalScrollBar();
+				JScrollBar bar = scrollPane.getVerticalScrollBar();
 				bar.setValue(bar.getMaximum());
-				pane.revalidate();
+				scrollPane.revalidate();
 			}
 			
 		});

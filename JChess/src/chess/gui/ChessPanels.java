@@ -41,21 +41,26 @@ public class ChessPanels{
 	private Piece movePiece;
 	private MoveState moveState;
 	private MoveLog moveLog;
-	private CapturedPiecePanel capturePanel;
+	private CapturedPiecePanel blackCapturePanel;
+	private CapturedPiecePanel whiteCapturePanel;
 
 	public ChessPanels() {
 		this.gameWindow = new JFrame("Sid's Chess App");
 		this.chessBoard = Board.createStandardBoard();
-		//this.chessBoard = Board.createTestBoard();
-		JPanel homeOfAllPanels = new JPanel(new BorderLayout());
-		this.boardPanel = new BoardPanel();
 		this.moveState = MoveState.CHOOSE;
 		this.movePiece = null;
-		this.capturePanel = new CapturedPiecePanel(Alliance.BLACK);
+		
+		//this.chessBoard = Board.createTestBoard();
+		
+		JPanel homeOfAllPanels = new JPanel(new BorderLayout());
+		this.boardPanel = new BoardPanel();
+		this.blackCapturePanel = new CapturedPiecePanel(Alliance.BLACK);
+		this.whiteCapturePanel = new CapturedPiecePanel(Alliance.WHITE);
 		this.moveLog = new MoveLog();
 		JPanel wardenOfTheEast = new JPanel(new BorderLayout());
-		wardenOfTheEast.add(capturePanel.getCapturedPiecePanel(), BorderLayout.NORTH);
+		wardenOfTheEast.add(blackCapturePanel.getCapturedPiecePanel(), BorderLayout.NORTH);
 		wardenOfTheEast.add(moveLog.getPane(), BorderLayout.CENTER);
+		wardenOfTheEast.add(whiteCapturePanel.getCapturedPiecePanel(),BorderLayout.SOUTH);
 		homeOfAllPanels.add(boardPanel, BorderLayout.CENTER);
 		homeOfAllPanels.add(wardenOfTheEast,BorderLayout.EAST);
 		gameWindow.add(homeOfAllPanels);
