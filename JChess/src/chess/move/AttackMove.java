@@ -27,12 +27,12 @@ public class AttackMove extends Move {
 				builder.setPiece(piece.movePiece(this));
 			}else if(piece.getFile() == this.getMoveFile() && piece.getRank() == this.getMoveRank()) {
 				builder.setPiece(new NoPiece(this.getMovePiece().getFile(), this.getMovePiece().getRank()));	
-				capturedPieces.add(piece);
-				builder.setCapturedPiece(capturedPieces);
+				builder.setCapturedPiece(piece);
 			}else {
 				builder.setPiece(piece);
 			}
 		}
+		capturedPieces.forEach(piece -> builder.setCapturedPiece(piece));
 		builder.setMover(BoardUtil.oppositeColor(currentBoard.getCurrentPlayerColor()));
 		builder.enPassantPawn(null);
 		

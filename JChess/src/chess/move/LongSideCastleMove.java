@@ -45,7 +45,7 @@ public class LongSideCastleMove extends Move{
 		}
 		builder.setMover(BoardUtil.oppositeColor(currentBoard.getCurrentPlayerColor()));
 		builder.enPassantPawn(null);
-		builder.setCapturedPiece(capturedPieces);
+		capturedPieces.forEach(piece -> builder.setCapturedPiece(piece));
 		
 		return builder.execute();
 		// TODO Auto-generated method stub

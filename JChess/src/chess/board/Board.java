@@ -20,6 +20,7 @@ import chess.pieces.Piece;
 import chess.pieces.PieceType;
 import chess.pieces.Queen;
 import chess.pieces.Rook;
+import chess.pieces.SortByPiece;
 import chess.Player;
 
 public class Board {
@@ -45,7 +46,9 @@ public class Board {
 		allActivePieces = Stream.concat(Stream.concat(activeWhitePieces.stream(), activeBlackPieces.stream()),setActivePieces(builder.boardConfig,Alliance.EMPTY).stream()).collect(Collectors.toList());
 		this.allCapturedPieces = builder.capturedPieces;
 		this.capturedWhitePieces = this.allCapturedPieces.stream().filter(piece -> piece.getPieceColor() == Alliance.WHITE).collect(Collectors.toList());
+		Collections.sort(capturedWhitePieces, new SortByPiece());
 		this.capturedBlackPieces = this.allCapturedPieces.stream().filter(piece -> piece.getPieceColor() == Alliance.BLACK).collect(Collectors.toList());
+		Collections.sort(capturedBlackPieces, new SortByPiece());
 		this.whitePlayer = new Player(this,Alliance.WHITE);
 		this.blackPlayer = new Player(this,Alliance.BLACK);
 		this.enPassantPawn = builder.enPassantPawn;
@@ -310,8 +313,8 @@ public class Board {
 			this.enPassantPawn = pawn;
 		}
 		
-		public void setCapturedPiece(List<Piece> pieces) {
-			this.capturedPieces = pieces;
+		public void setCapturedPiece(Piece piece) {
+			this.capturedPieces.add(piece);
 		}
 		
 		public Board execute() {

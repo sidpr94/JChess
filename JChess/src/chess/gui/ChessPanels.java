@@ -10,10 +10,15 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.awt.RenderingHints;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.imageio.ImageIO;
+import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -54,15 +59,15 @@ public class ChessPanels{
 		
 		JPanel homeOfAllPanels = new JPanel(new BorderLayout());
 		this.boardPanel = new BoardPanel();
-		this.blackCapturePanel = new CapturedPiecePanel(Alliance.BLACK);
-		this.whiteCapturePanel = new CapturedPiecePanel(Alliance.WHITE);
+		this.blackCapturePanel = new CapturedPiecePanel();
+		this.whiteCapturePanel = new CapturedPiecePanel();
 		this.moveLog = new MoveLog();
 		JPanel wardenOfTheEast = new JPanel(new BorderLayout());
 		wardenOfTheEast.add(blackCapturePanel.getCapturedPiecePanel(), BorderLayout.NORTH);
-		wardenOfTheEast.add(moveLog.getPane(), BorderLayout.CENTER);
+		wardenOfTheEast.add(boardPanel, BorderLayout.CENTER);
 		wardenOfTheEast.add(whiteCapturePanel.getCapturedPiecePanel(),BorderLayout.SOUTH);
-		homeOfAllPanels.add(boardPanel, BorderLayout.CENTER);
-		homeOfAllPanels.add(wardenOfTheEast,BorderLayout.EAST);
+		homeOfAllPanels.add(wardenOfTheEast, BorderLayout.CENTER);
+		homeOfAllPanels.add(moveLog.getPane(),BorderLayout.EAST);
 		gameWindow.add(homeOfAllPanels);
 	}
 
@@ -119,7 +124,8 @@ public class ChessPanels{
 
 		BoardPanel(){
 			super(new GridBagLayout());
-			setBackground(new Color(38,36,33));
+			setBackground(new Color(22,21,18));
+			setBorder(BorderFactory.createMatteBorder(0, 10, 0, 0, new Color(22,21,18)));
 		}
 
 		List<TilePanel> generateTiles() {
@@ -193,12 +199,16 @@ public class ChessPanels{
 											if(move.getClass().getName().endsWith("PawnPromotion")){
 												PawnPromotion specialMove = (PawnPromotion) move;
 												Thread newThread = new Thread(new Runnable() {
-
 													@Override
 													public void run() {
 														// TODO Auto-generated method stub
 														gameWindow.setEnabled(true);
 														updateBoard(specialMove.execute());
+														if(move.getMovePiece().getPieceColor() == Alliance.WHITE) {
+															whiteCapturePanel.addCapturedPieces(getBoard().getCapturedBlackPieces());
+														}else {
+															blackCapturePanel.addCapturedPieces(getBoard().getCapturedWhitePieces());
+														}
 														moveLog.addMove(specialMove);
 													}
 												});
@@ -209,6 +219,12 @@ public class ChessPanels{
 												gameWindow.setEnabled(false);
 											}else {
 												updateBoard(move.execute());
+												getBoard().getAllCapturedPieces().forEach(cap->System.out.println(cap.getPieceType()+" "+cap.getPieceColor()+" "+cap.getFile()+" "+cap.getRank()));
+												if(move.getMovePiece().getPieceColor() == Alliance.WHITE) {
+													whiteCapturePanel.addCapturedPieces(getBoard().getCapturedBlackPieces());
+												}else {
+													blackCapturePanel.addCapturedPieces(getBoard().getCapturedWhitePieces());
+												}
 												moveLog.addMove(move);
 
 											}
@@ -279,9 +295,16 @@ public class ChessPanels{
 		private void pieceIcon() {
 
 			Piece piece = getBoard().getPiece(getTileFile(), getTileRank());
-			ImageIcon pieceImage = null;
 			if(piece.getPieceType() != PieceType.EMPTY) {
-				pieceImage = new ImageIcon("images/"+piece.getPieceColor().getColorString()+piece.getPieceType().getPieceTypeString()+".png");
+				BufferedImage image = null;
+				try {
+					image = ImageIO.read(new File("images/"+piece.getPieceColor().getColorString()+piece.getPieceType().getPieceTypeString()+".png"));
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				ImageIcon pieceImage = new ImageIcon();
+				pieceImage.setImage(image);
 				JLabel label = new JLabel(pieceImage,SwingConstants.CENTER);
 				label.setPreferredSize(new Dimension(80,80));
 				label.setVerticalAlignment(SwingConstants.CENTER);

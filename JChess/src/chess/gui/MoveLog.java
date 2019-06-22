@@ -11,7 +11,6 @@ import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
-import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -42,9 +41,9 @@ public class MoveLog {
 		pane = new JPanel(new BorderLayout());
 		scrollPane = new JScrollPane(table);
 		scrollPane.setPreferredSize(new Dimension(80*4,(80*6)));
-		scrollPane.setBorder(BorderFactory.createEmptyBorder());
 		scrollPane.getViewport().setBackground(new Color(38,36,33));
 		scrollPane.setHorizontalScrollBar(null);
+		scrollPane.setBorder(BorderFactory.createEmptyBorder());
 		table.setBackground(new Color(38,36,33));
 		table.setForeground(new Color(222,227, 230));
 		table.setFont(new Font(Font.DIALOG, Font.BOLD, 15));
@@ -60,6 +59,7 @@ public class MoveLog {
 		table.setIntercellSpacing(new Dimension(5,0));
 		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		pane.add(scrollPane,BorderLayout.CENTER);
+		pane.setBorder(BorderFactory.createMatteBorder(40, 10, 40, 10, new Color(22,21,18)));
 	};
 	
 	public JPanel getPane() {

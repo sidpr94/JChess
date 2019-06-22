@@ -78,12 +78,12 @@ public class PawnPromotion extends Move implements Runnable{
 						builder.setPiece(chosenPiece);
 					}else if(piece.getFile() == getMoveFile() && piece.getRank() == getMoveRank()) {
 						builder.setPiece(new NoPiece(getMovePiece().getFile(), getMovePiece().getRank()));	
-						capturedPieces.add(piece);
-						builder.setCapturedPiece(capturedPieces);
+						builder.setCapturedPiece(piece);
 					}else {
 						builder.setPiece(piece);
 					}
 				}
+				capturedPieces.forEach(piece -> builder.setCapturedPiece(piece));
 				builder.setMover(BoardUtil.oppositeColor(currentBoard.getCurrentPlayerColor()));
 				builder.enPassantPawn(null);
 
@@ -91,6 +91,7 @@ public class PawnPromotion extends Move implements Runnable{
 			}else {
 				Board currentBoard = getBoard();
 				List<Piece> activePieces = currentBoard.getAllActivePieces();
+				List<Piece> capturedPieces = currentBoard.getAllCapturedPieces();
 				Builder builder = new Builder();
 				for(Piece piece : activePieces) {
 					if(piece.equals(getMovePiece())) {
@@ -101,7 +102,7 @@ public class PawnPromotion extends Move implements Runnable{
 						builder.setPiece(piece);
 					}
 				}
-				
+				capturedPieces.forEach(piece -> builder.setCapturedPiece(piece));
 				builder.setMover(BoardUtil.oppositeColor(currentBoard.getCurrentPlayerColor()));
 				builder.enPassantPawn(null);
 				

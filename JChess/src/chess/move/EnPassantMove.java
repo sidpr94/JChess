@@ -23,8 +23,8 @@ public class EnPassantMove extends Move {
 		Builder builder = new Builder();
 		Pawn enPassantPawn = currentBoard.getEnPassantPawn();
 		List<Piece> capturedPieces = this.getBoard().getAllCapturedPieces();
-		capturedPieces.add(enPassantPawn);
-		builder.setCapturedPiece(capturedPieces);
+		builder.setCapturedPiece(enPassantPawn);
+		capturedPieces.forEach(piece -> builder.setCapturedPiece(piece));
 		for(Piece piece : activePieces) {
 			if(piece.equals(this.getMovePiece())) {
 				builder.setPiece(piece.movePiece(this));

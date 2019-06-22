@@ -68,6 +68,7 @@ public class Player {
 		}
 		return noLegalMoves;
 	}
+	
 	public boolean isCheckMate() {
 		return hasNoLegalMoves() && isInCheck();
 	}

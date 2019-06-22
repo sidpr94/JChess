@@ -85,5 +85,4 @@ public class BoardUtil {
 		return notation;
 
 	}
-
 }

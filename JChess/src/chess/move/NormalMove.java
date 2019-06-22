@@ -31,9 +31,9 @@ public class NormalMove extends Move {
 				builder.setPiece(piece);
 			}
 		}
+		capturedPieces.forEach(piece -> builder.setCapturedPiece(piece));
 		builder.setMover(BoardUtil.oppositeColor(currentBoard.getCurrentPlayerColor()));
 		builder.enPassantPawn(null);
-		builder.setCapturedPiece(capturedPieces);
 		
 		return builder.execute();
 	}

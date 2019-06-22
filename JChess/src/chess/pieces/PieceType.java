@@ -3,18 +3,20 @@ package chess.pieces;
 import chess.Alliance;
 
 public enum PieceType {
-	PAWN ("P"),
-	ROOK ("R"),
-	BISHOP ("B"),
-	KNIGHT ("N"),
-	QUEEN ("Q"),
-	KING ("K"),
-	EMPTY ("-");
+	PAWN ("P",1),
+	ROOK ("R",5),
+	BISHOP ("B",3),
+	KNIGHT ("N",3),
+	QUEEN ("Q",9),
+	KING ("K",0),
+	EMPTY ("-",0);
 	
 	private String pieceTypeString;
+	private int material;
 	
-	private PieceType(String type) {
+	private PieceType(String type,int material) {
 		this.pieceTypeString = type;
+		this.material = material;
 	}
 	
 	public String getPiecePrint(Alliance color) {
@@ -27,5 +29,9 @@ public enum PieceType {
 	
 	public String getPieceNotation() {
 		return this.pieceTypeString.replace("P", "");
+	}
+	
+	public int getMaterialCount() {
+		return this.material;
 	}
 }

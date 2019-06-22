@@ -34,7 +34,7 @@ public class DoublePawnMove extends Move {
 				builder.setPiece(piece);
 			}
 		}
-		builder.setCapturedPiece(capturedPieces);
+		capturedPieces.forEach(piece -> builder.setCapturedPiece(piece));
 		builder.setMover(BoardUtil.oppositeColor(currentBoard.getCurrentPlayerColor()));
 		
 		return builder.execute();
