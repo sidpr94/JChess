@@ -97,6 +97,9 @@ public class ChessPanels{
 			if(value == JOptionPane.YES_OPTION) {
 				this.chessBoard = Board.createStandardBoard();
 				getBoardPanel().drawBoard();
+				moveLog.clearAllMoves();
+				whiteCapturePanel.removeAllCapturedPieces();
+				blackCapturePanel.removeAllCapturedPieces();
 			}else {
 				gameWindow.dispose();
 			}
@@ -107,6 +110,9 @@ public class ChessPanels{
 			if(value == JOptionPane.YES_OPTION) {
 				this.chessBoard = Board.createStandardBoard();
 				getBoardPanel().drawBoard();
+				moveLog.clearAllMoves();
+				whiteCapturePanel.removeAllCapturedPieces();
+				blackCapturePanel.removeAllCapturedPieces();
 			}else {
 				gameWindow.dispose();
 			}
@@ -203,13 +209,16 @@ public class ChessPanels{
 													public void run() {
 														// TODO Auto-generated method stub
 														gameWindow.setEnabled(true);
-														updateBoard(specialMove.execute());
+														Board moveBoard = specialMove.execute();
 														if(move.getMovePiece().getPieceColor() == Alliance.WHITE) {
-															whiteCapturePanel.addCapturedPieces(getBoard().getCapturedBlackPieces());
+															whiteCapturePanel.addCapturedPieces(moveBoard.getCapturedBlackPieces());
 														}else {
-															blackCapturePanel.addCapturedPieces(getBoard().getCapturedWhitePieces());
+															blackCapturePanel.addCapturedPieces(moveBoard.getCapturedWhitePieces());
 														}
-														moveLog.addMove(specialMove);
+														whiteCapturePanel.setTextAdvantage(moveBoard.getCapturedBlackPieces(),moveBoard.getCapturedWhitePieces());
+														blackCapturePanel.setTextAdvantage(moveBoard.getCapturedWhitePieces(),moveBoard.getCapturedBlackPieces());
+														moveLog.addMove(specialMove,moveBoard);
+														updateBoard(moveBoard);
 													}
 												});
 												specialMove.setNewThread(newThread);
@@ -218,14 +227,16 @@ public class ChessPanels{
 												t.start();
 												gameWindow.setEnabled(false);
 											}else {
-												updateBoard(move.execute());
-												getBoard().getAllCapturedPieces().forEach(cap->System.out.println(cap.getPieceType()+" "+cap.getPieceColor()+" "+cap.getFile()+" "+cap.getRank()));
+												Board moveBoard = move.execute();
 												if(move.getMovePiece().getPieceColor() == Alliance.WHITE) {
-													whiteCapturePanel.addCapturedPieces(getBoard().getCapturedBlackPieces());
+													whiteCapturePanel.addCapturedPieces(moveBoard.getCapturedBlackPieces());
 												}else {
-													blackCapturePanel.addCapturedPieces(getBoard().getCapturedWhitePieces());
+													blackCapturePanel.addCapturedPieces(moveBoard.getCapturedWhitePieces());
 												}
-												moveLog.addMove(move);
+												whiteCapturePanel.setTextAdvantage(moveBoard.getCapturedBlackPieces(),moveBoard.getCapturedWhitePieces());
+												blackCapturePanel.setTextAdvantage(moveBoard.getCapturedWhitePieces(),moveBoard.getCapturedBlackPieces());
+												moveLog.addMove(move,moveBoard);
+												updateBoard(moveBoard);
 
 											}
 											//Board.printBoard(getBoard());
