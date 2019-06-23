@@ -9,7 +9,10 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import java.awt.image.WritableRaster;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -44,10 +47,9 @@ public class MoveLog {
 	private final JButton nextMove;
 	private final JButton lastMove;
 	private ChessPanels chessPanels;
-	private Board currentBoard;
 	private boolean isLast;
-	private int boardIndex;
 	private final List<Board> boards = new ArrayList<Board>();
+	private int loc;
 
 	public MoveLog(ChessPanels chessPanels) {
 
@@ -88,6 +90,31 @@ public class MoveLog {
 		table.setIntercellSpacing(new Dimension(5,0));
 		table.setCellSelectionEnabled(true);
 		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		table.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent evt) {
+				int row = table.rowAtPoint(evt.getPoint());
+				int col = table.columnAtPoint(evt.getPoint());
+				if(row >= 0 && col >= 1) {
+					loc = 2*row+col;
+					if(loc == boards.size()-1) {
+						isLast = true;
+						lastMove.setEnabled(false);
+						nextMove.setEnabled(false);
+						previousMove.setEnabled(true);
+						firstMove.setEnabled(true);
+					}else {
+						isLast = false;
+						lastMove.setEnabled(true);
+						nextMove.setEnabled(true);
+						previousMove.setEnabled(true);
+						firstMove.setEnabled(true);
+					}
+					chessPanels.updateBoard(boards.get(2*row+col));
+					table.changeSelection(row, col, false, false);
+				}
+			}
+		});
 
 		JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER,0,0));
 		buttonPanel.setPreferredSize(new Dimension(80*4,40));
@@ -122,9 +149,12 @@ public class MoveLog {
 
 	public void addMove(Move move) {
 		// TODO Auto-generated method stub
+		if (boards.size() > 0) {
+			boards.remove(boards.size()-1);
+		}
 		boards.add(move.getBoard());
-		currentBoard = move.execute();
-		boardIndex = boards.size()-1;
+		boards.add(move.execute());
+		loc = boards.size()-1;
 		String moveNotation = BoardUtil.getAlgebraicNotation(move);
 		if(move.getMovePiece().getPieceColor() == chess.Alliance.WHITE) {
 			((DefaultTableModel) table.getModel()).addRow(new Object[] {table.getModel().getRowCount()+1,moveNotation,""});
@@ -170,48 +200,91 @@ public class MoveLog {
 					// TODO Auto-generated method stub
 					if(arrow == "Previous") {
 						isLast = false;
-						if(boardIndex == 0){
-							chessPanels.updateBoard(boards.get(boardIndex));
+						loc = loc - 1;
+						if(loc == 0) {
 							firstMove.setEnabled(false);
-							previousMove. setEnabled(false);
+							previousMove.setEnabled(false);
+							table.changeSelection(table.getSelectedRow(), table.getSelectedColumn(), true, false);
 						}else {
-							chessPanels.updateBoard(boards.get(boardIndex));
-							boardIndex = boardIndex - 1;
+							if(loc % 2 == 0) {
+								table.changeSelection(table.getSelectedRow()-1, 2, false, false);
+							}else {
+								table.changeSelection(table.getSelectedRow(), 1, false, false);
+							}
 						}
+						chessPanels.updateBoard(boards.get(loc));
 						nextMove.setEnabled(true);
 						lastMove.setEnabled(true);
 					}else if(arrow == "Next") {
-						if(boardIndex == boards.size()-1) {
-							chessPanels.updateBoard(currentBoard);
-							nextMove.setEnabled(false);
+						loc = loc + 1;
+						if(loc == boards.size()-1) {
 							lastMove.setEnabled(false);
+							nextMove.setEnabled(false);
 							isLast = true;
-						}else {
-							chessPanels.updateBoard(boards.get(boardIndex+1));
-							boardIndex = boardIndex + 1;
 						}
+						if(loc % 2 == 0) {
+							table.changeSelection(table.getSelectedRow(), 2, false, false);
+						}else {
+							table.changeSelection(table.getSelectedRow()+1, 1, false, false);
+						}
+						chessPanels.updateBoard(boards.get(loc));
 						firstMove.setEnabled(true);
 						previousMove.setEnabled(true);
 					}else if(arrow == "First") {
 						isLast = false;
 						chessPanels.updateBoard(boards.get(0));
-						boardIndex = 0;
+						loc = 0;
 						firstMove.setEnabled(false);
 						previousMove.setEnabled(false);
 						nextMove.setEnabled(true);
 						lastMove.setEnabled(true);
+						table.changeSelection(table.getSelectedRow(), table.getSelectedColumn(), true, false);
 					}else if(arrow == "Last") {
-						chessPanels.updateBoard(currentBoard);
-						boardIndex = boards.size()-1;
+						chessPanels.updateBoard(boards.get(boards.size()-1));
+						loc = boards.size()-1;
 						isLast = true;
 						nextMove.setEnabled(false);
 						lastMove.setEnabled(false);
 						firstMove.setEnabled(true);
 						previousMove.setEnabled(true);
+						if(loc % 2 == 0) {
+							table.changeSelection(table.getRowCount()-1, 2, false, false);
+						}else {
+							table.changeSelection(table.getRowCount()-1, 1, false, false);
+						}
 					}
 				}
 
 			});
+		}
+
+		@Override
+		public Icon getDisabledIcon() {
+			BufferedImage thumbImage = null;
+			BufferedImage image = null;
+			try {
+				image = ImageIO.read(new File("images/"+arrow+".png"));
+				thumbImage = new BufferedImage(30, 30, BufferedImage.TYPE_INT_ARGB);
+				Graphics2D g2d = thumbImage.createGraphics();
+				g2d.drawImage(image.getScaledInstance(30, 30, Image.SCALE_SMOOTH), 0, 0, 30, 30, null);
+				g2d.dispose();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			WritableRaster raster = thumbImage.getRaster();
+			for (int xx = 0; xx < thumbImage.getWidth(); xx++) {
+				for (int yy = 0; yy < thumbImage.getHeight(); yy++) {
+					int[] pixels = raster.getPixel(xx, yy, (int[]) null);
+					pixels[0] = 100;
+					pixels[1] = 100;
+					pixels[2] = 100;
+					raster.setPixel(xx, yy, pixels);
+				}
+			}
+			ImageIcon icon = new ImageIcon();
+			icon.setImage(thumbImage);
+			return icon;
 		}
 
 		@Override
@@ -228,8 +301,19 @@ public class MoveLog {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			WritableRaster raster = thumbImage.getRaster();
+			for (int xx = 0; xx < thumbImage.getWidth(); xx++) {
+				for (int yy = 0; yy < thumbImage.getHeight(); yy++) {
+					int[] pixels = raster.getPixel(xx, yy, (int[]) null);
+					pixels[0] = 180;
+					pixels[1] = 180;
+					pixels[2] = 180;
+					raster.setPixel(xx, yy, pixels);
+				}
+			}
 			ImageIcon icon = new ImageIcon();
 			icon.setImage(thumbImage);
+
 			return icon;
 		}
 
