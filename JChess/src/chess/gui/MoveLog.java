@@ -39,9 +39,20 @@ public class MoveLog {
 	private final JPanel pane;
 	private final JScrollPane scrollPane;
 	private final JTable table;
-	private final List<Board> boardStates = new ArrayList<Board>();
+	private final JButton firstMove;
+	private final JButton previousMove;
+	private final JButton nextMove;
+	private final JButton lastMove;
+	private ChessPanels chessPanels;
+	private Board currentBoard;
+	private boolean isLast;
+	private int boardIndex;
+	private final List<Board> boards = new ArrayList<Board>();
 
-	public MoveLog() {
+	public MoveLog(ChessPanels chessPanels) {
+
+		this.chessPanels = chessPanels;
+
 		table = new JTable(new DefaultTableModel() {
 			/**
 			 * 
@@ -75,47 +86,60 @@ public class MoveLog {
 		table.getColumn("Row number").setMaxWidth(60);
 		table.setRowHeight(30);
 		table.setIntercellSpacing(new Dimension(5,0));
+		table.setCellSelectionEnabled(true);
 		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
 		JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER,0,0));
 		buttonPanel.setPreferredSize(new Dimension(80*4,40));
 		buttonPanel.setBackground(new Color(48,46,43));
 
-		JButton firstMove = new customButton("First");
+		firstMove = new customButton("First");
+		firstMove.setEnabled(false);
 		buttonPanel.add(firstMove);
 
-		JButton previousMove = new customButton("Previous");
+		previousMove = new customButton("Previous");
+		previousMove.setEnabled(false);
 		buttonPanel.add(previousMove);
 
-		JButton nextMove = new customButton("Next");
+		nextMove = new customButton("Next");
+		nextMove.setEnabled(false);
 		buttonPanel.add(nextMove);
 
-		JButton lastMove = new customButton("Last");
+		lastMove = new customButton("Last");
+		lastMove.setEnabled(false);
 		buttonPanel.add(lastMove);
-		
+
 		pane.add(scrollPane,BorderLayout.CENTER);
 		pane.add(buttonPanel,BorderLayout.SOUTH);
 		pane.setBorder(BorderFactory.createMatteBorder(40, 10, 40, 10, new Color(22,21,18)));
+
+		isLast = true;
 	};
 
 	public JPanel getPane() {
 		return this.pane;
 	}
 
-	public void addMove(Move move,Board moveBoard) {
+	public void addMove(Move move) {
 		// TODO Auto-generated method stub
-		boardStates.add(moveBoard);
+		boards.add(move.getBoard());
+		currentBoard = move.execute();
+		boardIndex = boards.size()-1;
 		String moveNotation = BoardUtil.getAlgebraicNotation(move);
 		if(move.getMovePiece().getPieceColor() == chess.Alliance.WHITE) {
 			((DefaultTableModel) table.getModel()).addRow(new Object[] {table.getModel().getRowCount()+1,moveNotation,""});
+			table.changeSelection(table.getModel().getRowCount()-1, 1, false, false);
 		}else {
 			table.getModel().setValueAt(moveNotation, table.getModel().getRowCount()-1, 2);
+			table.changeSelection(table.getModel().getRowCount()-1, 2, false, false);
 		}
 		SwingUtilities.invokeLater(new Runnable(){
 
 			@Override
 			public void run() {
 				// TODO Auto-generated method stub
+				firstMove.setEnabled(true);
+				previousMove.setEnabled(true);
 				JScrollBar bar = scrollPane.getVerticalScrollBar();
 				bar.setValue(bar.getMaximum());
 				scrollPane.revalidate();
@@ -125,7 +149,6 @@ public class MoveLog {
 	}
 
 	public void clearAllMoves() {
-		boardStates.clear();
 		DefaultTableModel dtm = (DefaultTableModel) table.getModel();
 		dtm.setRowCount(0);
 		pane.repaint();
@@ -146,16 +169,48 @@ public class MoveLog {
 				public void actionPerformed(ActionEvent arg0) {
 					// TODO Auto-generated method stub
 					if(arrow == "Previous") {
-						
+						isLast = false;
+						if(boardIndex == 0){
+							chessPanels.updateBoard(boards.get(boardIndex));
+							firstMove.setEnabled(false);
+							previousMove. setEnabled(false);
+						}else {
+							chessPanels.updateBoard(boards.get(boardIndex));
+							boardIndex = boardIndex - 1;
+						}
+						nextMove.setEnabled(true);
+						lastMove.setEnabled(true);
 					}else if(arrow == "Next") {
-						
+						if(boardIndex == boards.size()-1) {
+							chessPanels.updateBoard(currentBoard);
+							nextMove.setEnabled(false);
+							lastMove.setEnabled(false);
+							isLast = true;
+						}else {
+							chessPanels.updateBoard(boards.get(boardIndex+1));
+							boardIndex = boardIndex + 1;
+						}
+						firstMove.setEnabled(true);
+						previousMove.setEnabled(true);
 					}else if(arrow == "First") {
-						
+						isLast = false;
+						chessPanels.updateBoard(boards.get(0));
+						boardIndex = 0;
+						firstMove.setEnabled(false);
+						previousMove.setEnabled(false);
+						nextMove.setEnabled(true);
+						lastMove.setEnabled(true);
 					}else if(arrow == "Last") {
-						
+						chessPanels.updateBoard(currentBoard);
+						boardIndex = boards.size()-1;
+						isLast = true;
+						nextMove.setEnabled(false);
+						lastMove.setEnabled(false);
+						firstMove.setEnabled(true);
+						previousMove.setEnabled(true);
 					}
 				}
-				
+
 			});
 		}
 
@@ -177,17 +232,21 @@ public class MoveLog {
 			icon.setImage(thumbImage);
 			return icon;
 		}
-		
+
 		@Override
 		public boolean isBorderPainted() {
 			return false;
 		}
-		
+
 		@Override
 		public boolean isContentAreaFilled() {
 			return false;
 		}
-		
+
+	}
+
+	public boolean isLast() {
+		return isLast;
 	}
 
 }

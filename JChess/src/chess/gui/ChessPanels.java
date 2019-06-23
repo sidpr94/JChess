@@ -54,20 +54,20 @@ public class ChessPanels{
 		this.chessBoard = Board.createStandardBoard();
 		this.moveState = MoveState.CHOOSE;
 		this.movePiece = null;
-		
-		//this.chessBoard = Board.createTestBoard();
-		
+
 		JPanel homeOfAllPanels = new JPanel(new BorderLayout());
 		this.boardPanel = new BoardPanel();
 		this.blackCapturePanel = new CapturedPiecePanel();
 		this.whiteCapturePanel = new CapturedPiecePanel();
-		this.moveLog = new MoveLog();
+		this.moveLog = new MoveLog(this);
+
 		JPanel wardenOfTheEast = new JPanel(new BorderLayout());
 		wardenOfTheEast.add(blackCapturePanel.getCapturedPiecePanel(), BorderLayout.NORTH);
 		wardenOfTheEast.add(boardPanel, BorderLayout.CENTER);
 		wardenOfTheEast.add(whiteCapturePanel.getCapturedPiecePanel(),BorderLayout.SOUTH);
 		homeOfAllPanels.add(wardenOfTheEast, BorderLayout.CENTER);
 		homeOfAllPanels.add(moveLog.getPane(),BorderLayout.EAST);
+
 		gameWindow.add(homeOfAllPanels);
 	}
 
@@ -87,34 +87,36 @@ public class ChessPanels{
 		return chessBoard;
 	}
 
-	private void updateBoard(Board board) {
+	public void updateBoard(Board board) {
 		this.chessBoard = board;
 		getBoardPanel().drawBoard();
-		if(board.getCurrentPlayer().isCheckMate()) {
-			Object[] options = {"New Game",
-			"Exit"};
-			int value = JOptionPane.showOptionDialog(gameWindow, BoardUtil.oppositeColor(board.getCurrentPlayerColor()).toString()+" wins by checkmate!", "Game Over!", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
-			if(value == JOptionPane.YES_OPTION) {
-				this.chessBoard = Board.createStandardBoard();
-				getBoardPanel().drawBoard();
-				moveLog.clearAllMoves();
-				whiteCapturePanel.removeAllCapturedPieces();
-				blackCapturePanel.removeAllCapturedPieces();
-			}else {
-				gameWindow.dispose();
-			}
-		}else if(board.getCurrentPlayer().isStaleMate()) {
-			Object[] options = {"New Game",
-			"Exit"};
-			int value = JOptionPane.showOptionDialog(gameWindow, BoardUtil.oppositeColor(board.getCurrentPlayerColor()).toString()+" draws by stalemate!", "Game Over!", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
-			if(value == JOptionPane.YES_OPTION) {
-				this.chessBoard = Board.createStandardBoard();
-				getBoardPanel().drawBoard();
-				moveLog.clearAllMoves();
-				whiteCapturePanel.removeAllCapturedPieces();
-				blackCapturePanel.removeAllCapturedPieces();
-			}else {
-				gameWindow.dispose();
+		if(moveLog.isLast()) {
+			if(board.getCurrentPlayer().isCheckMate()) {
+				Object[] options = {"New Game",
+				"Exit"};
+				int value = JOptionPane.showOptionDialog(gameWindow, BoardUtil.oppositeColor(board.getCurrentPlayerColor()).toString()+" wins by checkmate!", "Game Over!", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
+				if(value == JOptionPane.YES_OPTION) {
+					this.chessBoard = Board.createStandardBoard();
+					getBoardPanel().drawBoard();
+					moveLog.clearAllMoves();
+					whiteCapturePanel.removeAllCapturedPieces();
+					blackCapturePanel.removeAllCapturedPieces();
+				}else {
+					gameWindow.dispose();
+				}
+			}else if(board.getCurrentPlayer().isStaleMate()) {
+				Object[] options = {"New Game",
+				"Exit"};
+				int value = JOptionPane.showOptionDialog(gameWindow, BoardUtil.oppositeColor(board.getCurrentPlayerColor()).toString()+" draws by stalemate!", "Game Over!", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
+				if(value == JOptionPane.YES_OPTION) {
+					this.chessBoard = Board.createStandardBoard();
+					getBoardPanel().drawBoard();
+					moveLog.clearAllMoves();
+					whiteCapturePanel.removeAllCapturedPieces();
+					blackCapturePanel.removeAllCapturedPieces();
+				}else {
+					gameWindow.dispose();
+				}
 			}
 		}
 	}
@@ -185,7 +187,7 @@ public class ChessPanels{
 			addMouseListener(new MouseAdapter() {
 				public void mouseClicked(MouseEvent e) {
 					if(SwingUtilities.isLeftMouseButton(e)) {
-						if(!getBoard().getCurrentPlayer().isCheckMate()) {
+						if(!getBoard().getCurrentPlayer().isCheckMate() && moveLog.isLast()) {
 							if(moveState == MoveState.CHOOSE) {
 								movePiece = getBoard().getPiece(getTileFile(),getTileRank());
 								boardPanel.drawBoard();
@@ -217,7 +219,7 @@ public class ChessPanels{
 														}
 														whiteCapturePanel.setTextAdvantage(moveBoard.getCapturedBlackPieces(),moveBoard.getCapturedWhitePieces());
 														blackCapturePanel.setTextAdvantage(moveBoard.getCapturedWhitePieces(),moveBoard.getCapturedBlackPieces());
-														moveLog.addMove(specialMove,moveBoard);
+														moveLog.addMove(specialMove);
 														updateBoard(moveBoard);
 													}
 												});
@@ -235,9 +237,8 @@ public class ChessPanels{
 												}
 												whiteCapturePanel.setTextAdvantage(moveBoard.getCapturedBlackPieces(),moveBoard.getCapturedWhitePieces());
 												blackCapturePanel.setTextAdvantage(moveBoard.getCapturedWhitePieces(),moveBoard.getCapturedBlackPieces());
-												moveLog.addMove(move,moveBoard);
+												moveLog.addMove(move);
 												updateBoard(moveBoard);
-
 											}
 											//Board.printBoard(getBoard());
 											//System.out.println("");
@@ -265,7 +266,7 @@ public class ChessPanels{
 		}
 
 		private void setMoveTileColor() {
-			if(movePiece != null && movePiece.getPieceColor() == getBoard().getCurrentPlayerColor()) {
+			if(movePiece != null && movePiece.getPieceColor() == getBoard().getCurrentPlayerColor() && moveLog.isLast()) {
 				if((movePiece.getFile() == this.getTileFile()) && (movePiece.getRank() == this.getTileRank())) {
 					this.setBorder(new LineBorder(borderColor,4));
 				}
@@ -286,7 +287,7 @@ public class ChessPanels{
 			int r = 30;
 			int width = (this.getWidth() - r)/2;
 			int height = (this.getHeight() - r)/2;
-			if(movePiece != null && movePiece.getPieceColor() == getBoard().getCurrentPlayerColor()) {
+			if(movePiece != null && movePiece.getPieceColor() == getBoard().getCurrentPlayerColor() && moveLog.isLast()) {
 				for(Move move : movePiece.getLegalMoves(getBoard())) {
 					if((move.getMoveFile() == this.getTileFile()) && (move.getMoveRank() == this.getTileRank()) && !getBoard().movesToCheck(move)) {
 						g2.fillOval(width,height,r,r);
