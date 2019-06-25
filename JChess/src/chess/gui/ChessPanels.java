@@ -48,10 +48,10 @@ public class ChessPanels{
 	private MoveLog moveLog;
 	private CapturedPiecePanel blackCapturePanel;
 	private CapturedPiecePanel whiteCapturePanel;
+	private boolean boardFlipped = false;
 
 	public ChessPanels() {
 		this.gameWindow = new JFrame("Sid's Chess App");
-		this.chessBoard = Board.createStandardBoard();
 		this.moveState = MoveState.CHOOSE;
 		this.movePiece = null;
 
@@ -62,9 +62,9 @@ public class ChessPanels{
 		this.moveLog = new MoveLog(this);
 
 		JPanel wardenOfTheEast = new JPanel(new BorderLayout());
-		wardenOfTheEast.add(blackCapturePanel.getCapturedPiecePanel(), BorderLayout.NORTH);
+		wardenOfTheEast.add(blackCapturePanel.getCapturedPiecePanel(), !boardFlipped ? BorderLayout.NORTH : BorderLayout.SOUTH);
 		wardenOfTheEast.add(boardPanel, BorderLayout.CENTER);
-		wardenOfTheEast.add(whiteCapturePanel.getCapturedPiecePanel(),BorderLayout.SOUTH);
+		wardenOfTheEast.add(whiteCapturePanel.getCapturedPiecePanel(), !boardFlipped ? BorderLayout.SOUTH : BorderLayout.NORTH);
 		homeOfAllPanels.add(wardenOfTheEast, BorderLayout.CENTER);
 		homeOfAllPanels.add(moveLog.getPane(),BorderLayout.EAST);
 
@@ -72,6 +72,20 @@ public class ChessPanels{
 	}
 
 	public void show() {
+		moveLog.clearAllMoves();
+		whiteCapturePanel.removeAllCapturedPieces();
+		blackCapturePanel.removeAllCapturedPieces();
+		//this.chessBoard = Board.createStandardBoard();
+		this.chessBoard = Board.createTestBoard();
+		Object[] options = {"White","Black"};
+		int value = JOptionPane.showOptionDialog(gameWindow, "Choose a color!", "Game Set-Up", JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[1]);
+		if(value == JOptionPane.YES_OPTION) {
+			boardFlipped = false;
+		}else if(value == JOptionPane.NO_OPTION) {
+			boardFlipped = true;
+		}else {
+			gameWindow.dispose();
+		}
 		getBoardPanel().drawBoard();
 		gameWindow.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		gameWindow.pack();
@@ -97,10 +111,7 @@ public class ChessPanels{
 				int value = JOptionPane.showOptionDialog(gameWindow, BoardUtil.oppositeColor(board.getCurrentPlayerColor()).toString()+" wins by checkmate!", "Game Over!", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
 				if(value == JOptionPane.YES_OPTION) {
 					this.chessBoard = Board.createStandardBoard();
-					getBoardPanel().drawBoard();
-					moveLog.clearAllMoves();
-					whiteCapturePanel.removeAllCapturedPieces();
-					blackCapturePanel.removeAllCapturedPieces();
+					show();
 				}else {
 					gameWindow.dispose();
 				}
@@ -109,11 +120,25 @@ public class ChessPanels{
 				"Exit"};
 				int value = JOptionPane.showOptionDialog(gameWindow, BoardUtil.oppositeColor(board.getCurrentPlayerColor()).toString()+" draws by stalemate!", "Game Over!", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
 				if(value == JOptionPane.YES_OPTION) {
-					this.chessBoard = Board.createStandardBoard();
-					getBoardPanel().drawBoard();
-					moveLog.clearAllMoves();
-					whiteCapturePanel.removeAllCapturedPieces();
-					blackCapturePanel.removeAllCapturedPieces();
+					show();
+				}else {
+					gameWindow.dispose();
+				}
+			}else if(moveLog.isFiftyMoveRule()) {
+				Object[] options = {"New Game",
+				"Exit"};
+				int value = JOptionPane.showOptionDialog(gameWindow, BoardUtil.oppositeColor(board.getCurrentPlayerColor()).toString()+" draws by fifty move rule!", "Game Over!", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
+				if(value == JOptionPane.YES_OPTION) {
+					show();
+				}else {
+					gameWindow.dispose();
+				}
+			}else if(getBoard().insufficientMaterial()) {
+				Object[] options = {"New Game",
+				"Exit"};
+				int value = JOptionPane.showOptionDialog(gameWindow,"Draw by insufficient material", "Game Over!", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
+				if(value == JOptionPane.YES_OPTION) {
+					show();
 				}else {
 					gameWindow.dispose();
 				}
@@ -153,8 +178,8 @@ public class ChessPanels{
 			this.boardTiles = generateTiles();
 			GridBagConstraints gb = new GridBagConstraints();
 			for(TilePanel tile : boardTiles) {
-				gb.gridx = BoardUtil.fToR[tile.getTileFile()];
-				gb.gridy = BoardUtil.rToC[tile.getTileRank()];
+				gb.gridx = !boardFlipped ? BoardUtil.fToR[tile.getTileFile()] : BoardUtil.rToC[tile.getTileFile()];
+				gb.gridy = !boardFlipped ? BoardUtil.rToC[tile.getTileRank()] : BoardUtil.fToR[tile.getTileRank()];
 				add(tile,gb);
 			}
 			validate();
@@ -296,10 +321,10 @@ public class ChessPanels{
 			}
 			g2.setColor(this.getBackground() == this.darkTileColor ? lightTileColor : darkTileColor);
 			g2.setFont(new Font(Font.DIALOG, Font.BOLD, 15));
-			if(getTileFile() == 7) {
+			if(!boardFlipped ? getTileFile() == 7 : getTileFile() == 0) {
 				g2.drawString(Integer.toString(BoardUtil.rToNo[getTileRank()]), this.getWidth()-10, 15);
 			}
-			if(getTileRank() == 0) {
+			if(!boardFlipped ? getTileRank() == 0 : getTileRank() == 7) {
 				g2.drawString(BoardUtil.fToA[getTileFile()], this.getWidth()-15, this.getHeight()-5);				
 			}
 		}

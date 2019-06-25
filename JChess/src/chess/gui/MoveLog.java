@@ -34,6 +34,8 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
 import chess.move.Move;
+import chess.move.MoveType;
+import chess.pieces.PieceType;
 import chess.board.Board;
 import chess.board.BoardUtil;
 
@@ -50,6 +52,8 @@ public class MoveLog {
 	private boolean isLast;
 	private final List<Board> boards = new ArrayList<Board>();
 	private int loc;
+	private int fiftyMoveRule = 0;
+	private int threeFoldRepetition = 0;
 
 	public MoveLog(ChessPanels chessPanels) {
 
@@ -155,6 +159,11 @@ public class MoveLog {
 		boards.add(move.getBoard());
 		boards.add(move.execute());
 		loc = boards.size()-1;
+		if(move.getMovePiece().getPieceType() != PieceType.PAWN && move.getMoveType() != MoveType.Attack) {
+			fiftyMoveRule++;
+		}else {
+			fiftyMoveRule = 0;
+		}
 		String moveNotation = BoardUtil.getAlgebraicNotation(move);
 		if(move.getMovePiece().getPieceColor() == chess.Alliance.WHITE) {
 			((DefaultTableModel) table.getModel()).addRow(new Object[] {table.getModel().getRowCount()+1,moveNotation,""});
@@ -333,4 +342,27 @@ public class MoveLog {
 		return isLast;
 	}
 
+	public boolean isFiftyMoveRule() {
+		return fiftyMoveRule >= 100;
+	}
+
+	public boolean isThreeMoveRepetition() {
+		boolean isThreeFold = false;
+		List<Board> moveBoards = new ArrayList<Board>();
+		moveBoards.addAll(boards);
+		moveBoards.remove(0);
+		Board currentBoard = moveBoards.get(moveBoards.size()-1);
+		moveBoards.remove(moveBoards.size()-1);
+		for(int i = (moveBoards.size() % 2 !=0 ? 1 : 0) ; i < moveBoards.size(); i+=2) {
+			if(currentBoard.equals(moveBoards.get(i))) {
+				threeFoldRepetition++;
+			}
+		}
+		if(threeFoldRepetition >= 2) {
+			isThreeFold = true;
+		}else {
+			threeFoldRepetition = 0;
+		}
+		return isThreeFold;
+	}
 }
