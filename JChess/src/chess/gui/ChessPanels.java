@@ -75,8 +75,8 @@ public class ChessPanels{
 		moveLog.clearAllMoves();
 		whiteCapturePanel.removeAllCapturedPieces();
 		blackCapturePanel.removeAllCapturedPieces();
-		//this.chessBoard = Board.createStandardBoard();
-		this.chessBoard = Board.createTestBoard();
+		this.chessBoard = Board.createStandardBoard();
+		//this.chessBoard = Board.createTestBoard();
 		Object[] options = {"White","Black"};
 		int value = JOptionPane.showOptionDialog(gameWindow, "Choose a color!", "Game Set-Up", JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[1]);
 		if(value == JOptionPane.YES_OPTION) {
