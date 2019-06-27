@@ -36,7 +36,7 @@ public class CapturedPiecePanel {
 
 			@Override
 			public Dimension getPreferredSize() {
-				return new Dimension(80*5, 40);
+				return new Dimension(80*8, 40);
 			}
 		};
 		panel.setBackground(new Color(22,21,18));
