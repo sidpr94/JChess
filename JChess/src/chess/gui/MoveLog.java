@@ -145,7 +145,7 @@ public class MoveLog {
 		pane.setBorder(BorderFactory.createMatteBorder(40, 10, 40, 10, new Color(22,21,18)));
 
 		isLast = true;
-	};
+	}
 
 	public JPanel getPane() {
 		return this.pane;

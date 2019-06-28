@@ -2,20 +2,13 @@ package chess.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
-import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.GridLayout;
-import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionAdapter;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -25,18 +18,15 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JLayeredPane;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.border.LineBorder;
-import javax.swing.event.MouseInputAdapter;
 
 import chess.Alliance;
 import chess.board.Board;
@@ -58,30 +48,21 @@ public class ChessPanels{
 	private CapturedPiecePanel blackCapturePanel;
 	private CapturedPiecePanel whiteCapturePanel;
 	private boolean boardFlipped = false;
-	private TilePanel sourceTile;
-	private JLabel pieceLabel;
-	private JLayeredPane pane;
 
 	public ChessPanels() {
 		this.gameWindow = new JFrame("Sid's Chess App");
 		this.moveState = MoveState.CHOOSE;
 		this.movePiece = null;
-		this.sourceTile = null;
 
 		JPanel homeOfAllPanels = new JPanel(new BorderLayout());
-		pane = new JLayeredPane();
-		pane.setPreferredSize(new Dimension(630,631));
-		pane.setBorder(BorderFactory.createEmptyBorder());
 		this.boardPanel = new BoardPanel();
-		pane.add(boardPanel,JLayeredPane.DEFAULT_LAYER);
-		boardPanel.setBounds(0,0,640,640);
 		this.blackCapturePanel = new CapturedPiecePanel();
 		this.whiteCapturePanel = new CapturedPiecePanel();
 		this.moveLog = new MoveLog(this);
 
 		JPanel wardenOfTheEast = new JPanel(new BorderLayout());
 		wardenOfTheEast.add(blackCapturePanel.getCapturedPiecePanel(), !boardFlipped ? BorderLayout.NORTH : BorderLayout.SOUTH);
-		wardenOfTheEast.add(pane, BorderLayout.CENTER);
+		wardenOfTheEast.add(boardPanel, BorderLayout.CENTER);
 		wardenOfTheEast.add(whiteCapturePanel.getCapturedPiecePanel(), !boardFlipped ? BorderLayout.SOUTH : BorderLayout.NORTH);
 		homeOfAllPanels.add(wardenOfTheEast, BorderLayout.CENTER);
 		homeOfAllPanels.add(moveLog.getPane(),BorderLayout.EAST);
@@ -176,7 +157,7 @@ public class ChessPanels{
 		BoardPanel(){
 			super(new GridLayout(8,8));
 			setBackground(new Color(22,21,18));
-			setBorder(BorderFactory.createEmptyBorder());
+			setBorder(BorderFactory.createMatteBorder(0, 10, 0, 0, new Color(22,21,18)));
 		}
 
 		List<TilePanel> generateTiles() {
@@ -198,9 +179,6 @@ public class ChessPanels{
 			}
 			revalidate();
 			repaint();
-			System.out.println(boardPanel.getWidth()+" "+boardPanel.getHeight());
-			System.out.println(pane.getWidth()+" "+pane.getHeight());
-			System.out.println(pane.getBounds().getWidth()+" "+pane.getBounds().getHeight());
 		}
 
 
@@ -226,7 +204,6 @@ public class ChessPanels{
 			this.tileRank = tileRank;
 			assignTileColor();
 			pieceIcon();
-			/*
 			addMouseListener(new MouseAdapter() {
 				@Override
 				public void mouseClicked(MouseEvent e) {
@@ -294,7 +271,7 @@ public class ChessPanels{
 						}
 					}
 				}
-			});*/
+			});
 		}
 
 		private void assignTileColor() {
@@ -347,9 +324,6 @@ public class ChessPanels{
 			Piece piece = getBoard().getPiece(getTileFile(), getTileRank());
 			JLabel label = new JLabel();
 			label.setPreferredSize(new Dimension(80,80));
-			MoveMouseAdapter moveMouse = new MoveMouseAdapter();
-			label.addMouseMotionListener(moveMouse);
-			label.addMouseListener(moveMouse);
 			if(piece.getPieceType() != PieceType.EMPTY) {
 				BufferedImage image = null;
 				try {
@@ -365,7 +339,7 @@ public class ChessPanels{
 				label.setHorizontalAlignment(SwingConstants.CENTER);
 				label.setPreferredSize(new Dimension(80,80));
 				label.setVerticalAlignment(SwingConstants.CENTER);
-				//label.setOpaque(false);
+				label.setOpaque(false);
 				this.add(label, BorderLayout.CENTER);
 			}else {
 				this.add(label, BorderLayout.CENTER);
@@ -379,196 +353,5 @@ public class ChessPanels{
 		private int getTileRank() {
 			return tileRank;
 		}
-
-		private class MoveMouseAdapter extends MouseInputAdapter{
-			@Override
-			public void mousePressed(MouseEvent e) {
-				if(!getBoard().getCurrentPlayer().isCheckMate() && moveLog.isLast()) {
-					pieceLabel = (JLabel) e.getSource();
-					sourceTile = (TilePanel) pieceLabel.getParent();
-					Piece sourceTilePiece = getBoard().getPiece(sourceTile.getTileFile(), sourceTile.getTileRank());
-					if(sourceTilePiece.getPieceColor() == getBoard().getCurrentPlayerColor()) {
-						System.out.println("HELLO?!");
-						sourceTile.remove(pieceLabel);
-						movePiece = getBoard().getPiece(sourceTile.getTileFile(), sourceTile.getTileRank());		
-						pane.add(pieceLabel,JLayeredPane.DRAG_LAYER);
-						int x = sourceTile.getX()+e.getX()-pieceLabel.getWidth()/2;
-						int y = sourceTile.getY()+e.getY()-pieceLabel.getHeight()/2;
-						pieceLabel.setLocation(x,y);
-
-						boardPanel.repaint();
-					}
-				}
-			}
-
-			@Override
-			public void mouseDragged(MouseEvent e) {
-				if(movePiece != null) {
-					int pieceX = pieceLabel.getX()+e.getX()-pieceLabel.getWidth()/2;
-					int pieceY = pieceLabel.getY()+e.getY()-pieceLabel.getHeight()/2;
-					if(pieceX < boardPanel.getX()) {
-						pieceX = -pieceLabel.getWidth()/2;
-					}else if(pieceX > boardPanel.getX()+boardPanel.getWidth()) {
-						pieceX = boardPanel.getWidth()-pieceLabel.getWidth()/2;
-					}
-					if(pieceY < boardPanel.getY()) {
-						pieceY = -pieceLabel.getHeight()/2;
-					}else if(pieceY > boardPanel.getY()+boardPanel.getHeight()) {
-						pieceY = boardPanel.getHeight()-pieceLabel.getHeight()/2;
-					}
-					pieceLabel.setLocation(pieceX,pieceY);
-					boardPanel.repaint();
-				}
-			}
-
-			@Override
-			public void mouseMoved(MouseEvent e) {
-
-			}
-
-			@Override
-			public void mouseReleased(MouseEvent e) {
-				Point p = new Point(pieceLabel.getX()+e.getX(),pieceLabel.getY()+e.getY());
-				System.out.println(p.getX()+" "+p.getY());
-				System.out.println(boardPanel.getComponentAt(p));
-				TilePanel hoverPanel = (TilePanel) boardPanel.getComponentAt(p);
-				if(hoverPanel != sourceTile) {
-					if(movePiece != null) {
-						System.out.println("here");
-						for(Move move : movePiece.getLegalMoves(getBoard())) {
-							System.out.println("here");
-							if(hoverPanel != null) {
-								if(hoverPanel.getTileFile() == move.getMoveFile() && hoverPanel.getTileRank() == move.getMoveRank() && !getBoard().movesToCheck(move)) {
-									System.out.println("here");
-									if(move.getClass().getName().endsWith("PawnPromotion")){
-										PawnPromotion specialMove = (PawnPromotion) move;
-										Thread newThread = new Thread(new Runnable() {
-											@Override
-											public void run() {
-												// TODO Auto-generated method stub
-												gameWindow.setEnabled(true);
-												Board moveBoard = specialMove.execute();
-												if(move.getMovePiece().getPieceColor() == Alliance.WHITE) {
-													whiteCapturePanel.addCapturedPieces(moveBoard.getCapturedBlackPieces());
-												}else {
-													blackCapturePanel.addCapturedPieces(moveBoard.getCapturedWhitePieces());
-												}
-												whiteCapturePanel.setTextAdvantage(moveBoard.getCapturedBlackPieces(),moveBoard.getCapturedWhitePieces());
-												blackCapturePanel.setTextAdvantage(moveBoard.getCapturedWhitePieces(),moveBoard.getCapturedBlackPieces());
-												moveLog.addMove(specialMove);
-												updateBoard(moveBoard);
-											}
-										});
-										specialMove.setNewThread(newThread);
-										specialMove.setGameWindow(gameWindow);
-										Thread t = new Thread(specialMove);
-										t.start();
-										gameWindow.setEnabled(false);
-									}else {
-										Board moveBoard = move.execute();
-										if(move.getMovePiece().getPieceColor() == Alliance.WHITE) {
-											whiteCapturePanel.addCapturedPieces(moveBoard.getCapturedBlackPieces());
-										}else {
-											blackCapturePanel.addCapturedPieces(moveBoard.getCapturedWhitePieces());
-										}
-										whiteCapturePanel.setTextAdvantage(moveBoard.getCapturedBlackPieces(),moveBoard.getCapturedWhitePieces());
-										blackCapturePanel.setTextAdvantage(moveBoard.getCapturedWhitePieces(),moveBoard.getCapturedBlackPieces());
-										moveLog.addMove(move);
-										pane.remove(pieceLabel);
-										updateBoard(moveBoard);
-									}
-								}
-							}else {
-								pane.remove(pieceLabel);
-								sourceTile.add(pieceLabel);
-								pieceLabel.setLocation(sourceTile.getX(),sourceTile.getY());
-								pane.repaint();
-							}
-						}
-					}
-				}else {
-					System.out.println("slick back");
-					pane.remove(pieceLabel);
-					sourceTile.add(pieceLabel);
-					pieceLabel.setLocation(sourceTile.getX(),sourceTile.getY());
-					pane.repaint();
-				}
-				movePiece = null;
-				/*
-					if(!getBoard().getCurrentPlayer().isCheckMate() && moveLog.isLast()) {
-						if(moveState == MoveState.CHOOSE) {
-							movePiece = getBoard().getPiece(getTileFile(),getTileRank());
-							System.out.println("Choose: "+movePiece);
-							//							boardPanel.drawBoard();
-							boardPanel.repaint();
-						}else if(moveState == MoveState.MOVE) {
-							System.out.println("Move: "+movePiece);
-							if(!getBoard().getPiece(tileFile, tileRank).equals(movePiece) && getBoard().getPiece(tileFile, tileRank).getPieceType() != PieceType.EMPTY && getBoard().getPiece(tileFile, tileRank).getPieceColor() == getBoard().getCurrentPlayerColor()) {
-								movePiece = getBoard().getPiece(getTileFile(), getTileRank());
-							}else if(tileFile == movePiece.getFile() && tileRank == movePiece.getRank()) {
-								movePiece = null;
-							}
-							//							boardPanel.drawBoard();
-							boardPanel.repaint();
-						}
-						System.out.println();
-						moveState = moveState.nextState(getTileFile(),getTileRank(),movePiece,getBoard());
-						if(moveState == MoveState.DONE) {
-							System.out.println("Done: "+movePiece);
-							if(getBoard().getCurrentPlayer().getColor() == movePiece.getPieceColor()) {
-								for(Move move : movePiece.getLegalMoves(getBoard())) {
-									if(tileFile == move.getMoveFile() && tileRank == move.getMoveRank() && !getBoard().movesToCheck(move)) {
-										if(move.getClass().getName().endsWith("PawnPromotion")){
-											PawnPromotion specialMove = (PawnPromotion) move;
-											Thread newThread = new Thread(new Runnable() {
-												@Override
-												public void run() {
-													// TODO Auto-generated method stub
-													gameWindow.setEnabled(true);
-													Board moveBoard = specialMove.execute();
-													if(move.getMovePiece().getPieceColor() == Alliance.WHITE) {
-														whiteCapturePanel.addCapturedPieces(moveBoard.getCapturedBlackPieces());
-													}else {
-														blackCapturePanel.addCapturedPieces(moveBoard.getCapturedWhitePieces());
-													}
-													whiteCapturePanel.setTextAdvantage(moveBoard.getCapturedBlackPieces(),moveBoard.getCapturedWhitePieces());
-													blackCapturePanel.setTextAdvantage(moveBoard.getCapturedWhitePieces(),moveBoard.getCapturedBlackPieces());
-													moveLog.addMove(specialMove);
-													updateBoard(moveBoard);
-												}
-											});
-											specialMove.setNewThread(newThread);
-											specialMove.setGameWindow(gameWindow);
-											Thread t = new Thread(specialMove);
-											t.start();
-											gameWindow.setEnabled(false);
-										}else {
-											Board moveBoard = move.execute();
-											if(move.getMovePiece().getPieceColor() == Alliance.WHITE) {
-												whiteCapturePanel.addCapturedPieces(moveBoard.getCapturedBlackPieces());
-											}else {
-												blackCapturePanel.addCapturedPieces(moveBoard.getCapturedWhitePieces());
-											}
-											whiteCapturePanel.setTextAdvantage(moveBoard.getCapturedBlackPieces(),moveBoard.getCapturedWhitePieces());
-											blackCapturePanel.setTextAdvantage(moveBoard.getCapturedWhitePieces(),moveBoard.getCapturedBlackPieces());
-											moveLog.addMove(move);
-											updateBoard(moveBoard);
-										}
-										//Board.printBoard(getBoard());
-										//System.out.println("");
-									}
-								}
-							}
-						}
-						if(moveState == MoveState.MOVE && getBoard().getPiece(tileFile, tileRank).getPieceType() == PieceType.EMPTY) {
-							movePiece = null;
-						}
-						moveState = moveState.nextState(tileFile, tileRank, movePiece, getBoard());			
-					}
-				 */
-			}
-		}
-
 	}
 }
-
