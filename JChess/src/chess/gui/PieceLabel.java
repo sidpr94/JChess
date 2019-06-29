@@ -1,9 +1,7 @@
 package chess.gui;
 
 import java.awt.Dimension;
-import java.awt.dnd.DnDConstants;
-import java.awt.dnd.DragGestureRecognizer;
-import java.awt.dnd.DragSource;
+
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -23,13 +21,9 @@ public class PieceLabel extends JLabel {
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	private DragGestureHandler dragGestureHandler;
-	private DragGestureRecognizer dgr;
-	
 	public PieceLabel() {
 		setVerticalAlignment(SwingConstants.CENTER);
 		setHorizontalAlignment(SwingConstants.CENTER);
-		//setOpaque(false);
 	}
 	
 	@Override
@@ -53,22 +47,5 @@ public class PieceLabel extends JLabel {
 			setHorizontalAlignment(SwingConstants.CENTER);	
 		}
 	}
-	
-	@Override
-	public void addNotify() {
-		super.addNotify();
-		if(dgr == null) {
-			dragGestureHandler = new DragGestureHandler(this);
-			dgr = DragSource.getDefaultDragSource().createDefaultDragGestureRecognizer(this, DnDConstants.ACTION_MOVE, dragGestureHandler);
-		}
-	}
-	
-	@Override
-	public void removeNotify() {
-		super.addNotify();
-		if(dgr != null) {
-			dgr.removeDragGestureListener(dragGestureHandler);
-			dragGestureHandler = null;
-		}
-	}
+
 }
