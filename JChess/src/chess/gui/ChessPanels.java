@@ -9,21 +9,15 @@ import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 import java.awt.RenderingHints;
+import java.awt.dnd.DropTarget;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.border.LineBorder;
@@ -184,7 +178,7 @@ public class ChessPanels{
 
 	}
 
-	private class TilePanel extends JPanel{
+	class TilePanel extends JPanel{
 
 		/**
 		 * 
@@ -193,6 +187,9 @@ public class ChessPanels{
 
 		private final int tileFile;
 		private final int tileRank;
+		
+		private DropTarget dropTarget;
+		private DropHandler dropHandler;
 
 		private Color lightTileColor = new Color(222,227, 230);
 		private Color darkTileColor = new Color(140, 162, 173);
@@ -203,7 +200,12 @@ public class ChessPanels{
 			this.tileFile = tileFile;
 			this.tileRank = tileRank;
 			assignTileColor();
-			pieceIcon();
+			PieceLabel pieceLabel = new PieceLabel();
+			pieceLabel.setIcon(getBoard().getPiece(tileFile, tileRank));
+			if(getBoard().getPiece(tileFile,tileRank).getPieceType() != PieceType.EMPTY){
+				add(pieceLabel);
+			}
+			/*
 			addMouseListener(new MouseAdapter() {
 				@Override
 				public void mouseClicked(MouseEvent e) {
@@ -271,7 +273,7 @@ public class ChessPanels{
 						}
 					}
 				}
-			});
+			});*/
 		}
 
 		private void assignTileColor() {
@@ -319,39 +321,32 @@ public class ChessPanels{
 			}
 		}
 
-		private void pieceIcon() {
-
-			Piece piece = getBoard().getPiece(getTileFile(), getTileRank());
-			JLabel label = new JLabel();
-			label.setPreferredSize(new Dimension(80,80));
-			if(piece.getPieceType() != PieceType.EMPTY) {
-				BufferedImage image = null;
-				try {
-					image = ImageIO.read(new File("images/"+piece.getPieceColor().getColorString()+piece.getPieceType().getPieceTypeString()+".png"));
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				ImageIcon pieceImage = new ImageIcon();
-				pieceImage.setImage(image);
-				label.setIcon(pieceImage);
-				label.setVerticalAlignment(SwingConstants.CENTER);
-				label.setHorizontalAlignment(SwingConstants.CENTER);
-				label.setPreferredSize(new Dimension(80,80));
-				label.setVerticalAlignment(SwingConstants.CENTER);
-				label.setOpaque(false);
-				this.add(label, BorderLayout.CENTER);
-			}else {
-				this.add(label, BorderLayout.CENTER);
-			}
-		}
-
 		private int getTileFile() {
 			return tileFile;
 		}
 
 		private int getTileRank() {
 			return tileRank;
+		}
+		
+		@Override
+		public void addNotify() {
+			super.addNotify();
+			if(dropHandler == null) {
+				dropHandler = new DropHandler(this);
+			}
+			
+		}
+		
+		@Override
+		public void removeNotify() {
+			if(dropTarget != null) {
+				dropTarget.removeDropTargetListener(dropHandler);
+			}
+			dropTarget = null;
+			dropHandler = null;
+			
+			super.removeNotify();
 		}
 	}
 }
