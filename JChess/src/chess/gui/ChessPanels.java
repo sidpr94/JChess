@@ -10,7 +10,6 @@ import java.awt.GridLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.RenderingHints;
-import java.awt.dnd.DropTarget;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -187,9 +186,6 @@ public class ChessPanels{
 
 		private final int tileFile;
 		private final int tileRank;
-		
-		private DropTarget dropTarget;
-		private DropHandler dropHandler;
 
 		private Color lightTileColor = new Color(222,227, 230);
 		private Color darkTileColor = new Color(140, 162, 173);
@@ -205,7 +201,6 @@ public class ChessPanels{
 			if(getBoard().getPiece(tileFile,tileRank).getPieceType() != PieceType.EMPTY){
 				add(pieceLabel);
 			}
-			/*
 			addMouseListener(new MouseAdapter() {
 				@Override
 				public void mouseClicked(MouseEvent e) {
@@ -273,7 +268,7 @@ public class ChessPanels{
 						}
 					}
 				}
-			});*/
+			});
 		}
 
 		private void assignTileColor() {
@@ -327,26 +322,6 @@ public class ChessPanels{
 
 		private int getTileRank() {
 			return tileRank;
-		}
-		
-		@Override
-		public void addNotify() {
-			super.addNotify();
-			if(dropHandler == null) {
-				dropHandler = new DropHandler(this);
-			}
-			
-		}
-		
-		@Override
-		public void removeNotify() {
-			if(dropTarget != null) {
-				dropTarget.removeDropTargetListener(dropHandler);
-			}
-			dropTarget = null;
-			dropHandler = null;
-			
-			super.removeNotify();
 		}
 	}
 }
