@@ -186,7 +186,7 @@ public class ChessPanels{
 
 		private final int tileFile;
 		private final int tileRank;
-
+		
 		private Color lightTileColor = new Color(222,227, 230);
 		private Color darkTileColor = new Color(140, 162, 173);
 		private Color borderColor = new Color(255, 0, 0);
