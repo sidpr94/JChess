@@ -12,6 +12,8 @@ import java.awt.event.MouseEvent;
 import java.awt.RenderingHints;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
 
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
@@ -30,7 +32,7 @@ import chess.move.PawnPromotion;
 import chess.pieces.Piece;
 import chess.pieces.PieceType;
 
-public class ChessPanels{
+public class ChessPanels extends Observable{
 
 	private final JFrame gameWindow;
 	private final BoardPanel boardPanel;
@@ -46,6 +48,7 @@ public class ChessPanels{
 		this.gameWindow = new JFrame("Sid's Chess App");
 		this.moveState = MoveState.CHOOSE;
 		this.movePiece = null;
+		this.addObserver(new EngineWatcher());
 
 		JPanel homeOfAllPanels = new JPanel(new BorderLayout());
 		this.boardPanel = new BoardPanel();
@@ -97,6 +100,8 @@ public class ChessPanels{
 	public void updateBoard(Board board) {
 		this.chessBoard = board;
 		getBoardPanel().drawBoard();
+		this.setChanged();
+		this.notifyObservers(board);
 		if(moveLog.isLast()) {
 			if(board.getCurrentPlayer().isCheckMate()) {
 				Object[] options = {"New Game",
@@ -323,5 +328,17 @@ public class ChessPanels{
 		private int getTileRank() {
 			return tileRank;
 		}
+	}
+	
+	private class EngineWatcher implements Observer{
+
+		@Override
+		public void update(Observable obs, Object obj) {
+			// TODO Auto-generated method stub
+			if(!getBoard().getCurrentPlayer().isCheckMate()) {
+				
+			}
+		}
+		
 	}
 }
