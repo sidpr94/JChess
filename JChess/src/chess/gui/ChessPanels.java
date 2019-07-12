@@ -43,9 +43,11 @@ public class ChessPanels extends Observable{
 	private CapturedPiecePanel blackCapturePanel;
 	private CapturedPiecePanel whiteCapturePanel;
 	private boolean boardFlipped = false;
+	private GameSetup gameSetup;
 
 	public ChessPanels() {
 		this.gameWindow = new JFrame("Sid's Chess App");
+		this.gameSetup = new GameSetup(gameWindow);
 		this.moveState = MoveState.CHOOSE;
 		this.movePiece = null;
 		this.addObserver(new EngineWatcher());
@@ -72,6 +74,7 @@ public class ChessPanels extends Observable{
 		blackCapturePanel.removeAllCapturedPieces();
 		this.chessBoard = Board.createStandardBoard();
 		//this.chessBoard = Board.createTestBoard();
+		/*
 		Object[] options = {"White","Black"};
 		int value = JOptionPane.showOptionDialog(gameWindow, "Choose a color!", "Game Set-Up", JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[1]);
 		if(value == JOptionPane.YES_OPTION) {
@@ -81,6 +84,9 @@ public class ChessPanels extends Observable{
 		}else {
 			gameWindow.dispose();
 		}
+		*/
+		gameSetup.setVisible(true);
+		boardFlipped = gameSetup.isBoardFlipped();
 		getBoardPanel().drawBoard();
 		gameWindow.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		gameWindow.setResizable(false);
