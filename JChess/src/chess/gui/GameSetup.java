@@ -1,6 +1,7 @@
 package chess.gui;
 
-import java.awt.GridLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
@@ -13,6 +14,8 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JRadioButton;
 
+import chess.Alliance;
+import chess.Player;
 import chess.PlayerType;
 
 public class GameSetup extends JDialog {
@@ -32,13 +35,15 @@ public class GameSetup extends JDialog {
 		super(window,true);
 		
 		this.gameWindow = window;
-		setLayout(new GridLayout(10,1));
+		setLayout(new GridBagLayout());
+		this.setTitle("Choose Game Setup");
 		
-		JLabel label = new JLabel("Choose Game Setup");
-		add(label);
-		
+		GridBagConstraints gbc = new GridBagConstraints();
+
 		JLabel whiteLabel = new JLabel("Choose White Player");
-		add(whiteLabel);
+		gbc.gridx = 0;
+		gbc.gridy = 0;
+		add(whiteLabel,gbc);
 		
 		JRadioButton whiteHuman = new JRadioButton("Human");
 		whiteHuman.setSelected(true);
@@ -46,11 +51,17 @@ public class GameSetup extends JDialog {
 		ButtonGroup whiteButtons = new ButtonGroup();
 		whiteButtons.add(whiteHuman);
 		whiteButtons.add(whiteAI);
-		add(whiteHuman);
-		add(whiteAI);
+		gbc.gridx = 0;
+		gbc.gridy = 1;
+		add(whiteHuman,gbc);
+		gbc.gridx = 1;
+		gbc.gridy = 1;
+		add(whiteAI,gbc);
 		
 		JLabel blackLabel = new JLabel("Choose Black Player");
-		add(blackLabel);
+		gbc.gridx = 0;
+		gbc.gridy = 2;
+		add(blackLabel,gbc);
 		
 		JRadioButton blackHuman = new JRadioButton("Human");
 		blackHuman.setSelected(true);
@@ -58,8 +69,12 @@ public class GameSetup extends JDialog {
 		ButtonGroup blackButtons = new ButtonGroup();
 		blackButtons.add(blackHuman);
 		blackButtons.add(blackAI);
-		add(blackHuman);
-		add(blackAI);
+		gbc.gridx = 0;
+		gbc.gridy = 3;
+		add(blackHuman,gbc);
+		gbc.gridx = 1;
+		gbc.gridy = 3;
+		add(blackAI,gbc);
 		
 		JButton okButton = new JButton("Ok");
 		okButton.addActionListener(new ActionListener() {
@@ -75,7 +90,9 @@ public class GameSetup extends JDialog {
 			}
 			
 		});
-		add(okButton);
+		gbc.gridx = 0;
+		gbc.gridy = 4;
+		add(okButton,gbc);
 		JButton cancelButton = new JButton("Cancel");
 		cancelButton.addActionListener(new ActionListener() {
 
@@ -87,7 +104,9 @@ public class GameSetup extends JDialog {
 			}
 			
 		});
-		add(cancelButton);
+		gbc.gridx = 1;
+		gbc.gridy = 4;
+		add(cancelButton,gbc);
 		setLocationRelativeTo(window);
 		addWindowListener(new WindowListener() {
 
@@ -148,6 +167,13 @@ public class GameSetup extends JDialog {
 	
 	public boolean isBoardFlipped() {
 		return boardFlipped;
+	}
+	
+	public boolean isPlayerAI(Player player) {
+		if(player.getColor() == Alliance.WHITE) {
+			return getWhitePlayerType() == PlayerType.COMPUTER;
+		}
+		return getBlackPlayerType() == PlayerType.COMPUTER;
 	}
 
 }

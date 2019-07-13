@@ -11,26 +11,33 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.RenderingHints;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.concurrent.ExecutionException;
 
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 import javax.swing.WindowConstants;
 import javax.swing.border.LineBorder;
 
 import chess.Alliance;
 import chess.board.Board;
 import chess.board.BoardUtil;
+import chess.move.AttackMove;
 import chess.move.Move;
 import chess.move.MoveState;
+import chess.move.MoveType;
+import chess.move.NormalMove;
 import chess.move.PawnPromotion;
 import chess.pieces.Piece;
 import chess.pieces.PieceType;
+import chess.pieces.Queen;
 
 public class ChessPanels extends Observable{
 
@@ -69,25 +76,13 @@ public class ChessPanels extends Observable{
 	}
 
 	public void show() {
+		//this.chessBoard = Board.createTestBoard();
+		gameSetup.setVisible(true);
+		boardFlipped = gameSetup.isBoardFlipped();
 		moveLog.clearAllMoves();
 		whiteCapturePanel.removeAllCapturedPieces();
 		blackCapturePanel.removeAllCapturedPieces();
-		this.chessBoard = Board.createStandardBoard();
-		//this.chessBoard = Board.createTestBoard();
-		/*
-		Object[] options = {"White","Black"};
-		int value = JOptionPane.showOptionDialog(gameWindow, "Choose a color!", "Game Set-Up", JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[1]);
-		if(value == JOptionPane.YES_OPTION) {
-			boardFlipped = false;
-		}else if(value == JOptionPane.NO_OPTION) {
-			boardFlipped = true;
-		}else {
-			gameWindow.dispose();
-		}
-		*/
-		gameSetup.setVisible(true);
-		boardFlipped = gameSetup.isBoardFlipped();
-		getBoardPanel().drawBoard();
+		updateBoard(Board.createStandardBoard());
 		gameWindow.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		gameWindow.setResizable(false);
 		gameWindow.pack();
@@ -108,46 +103,6 @@ public class ChessPanels extends Observable{
 		getBoardPanel().drawBoard();
 		this.setChanged();
 		this.notifyObservers(board);
-		if(moveLog.isLast()) {
-			if(board.getCurrentPlayer().isCheckMate()) {
-				Object[] options = {"New Game",
-				"Exit"};
-				int value = JOptionPane.showOptionDialog(gameWindow, BoardUtil.oppositeColor(board.getCurrentPlayerColor()).toString()+" wins by checkmate!", "Game Over!", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
-				if(value == JOptionPane.YES_OPTION) {
-					this.chessBoard = Board.createStandardBoard();
-					show();
-				}else {
-					gameWindow.dispose();
-				}
-			}else if(board.getCurrentPlayer().isStaleMate()) {
-				Object[] options = {"New Game",
-				"Exit"};
-				int value = JOptionPane.showOptionDialog(gameWindow, BoardUtil.oppositeColor(board.getCurrentPlayerColor()).toString()+" draws by stalemate!", "Game Over!", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
-				if(value == JOptionPane.YES_OPTION) {
-					show();
-				}else {
-					gameWindow.dispose();
-				}
-			}else if(moveLog.isFiftyMoveRule()) {
-				Object[] options = {"New Game",
-				"Exit"};
-				int value = JOptionPane.showOptionDialog(gameWindow, BoardUtil.oppositeColor(board.getCurrentPlayerColor()).toString()+" draws by fifty move rule!", "Game Over!", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
-				if(value == JOptionPane.YES_OPTION) {
-					show();
-				}else {
-					gameWindow.dispose();
-				}
-			}else if(getBoard().insufficientMaterial()) {
-				Object[] options = {"New Game",
-				"Exit"};
-				int value = JOptionPane.showOptionDialog(gameWindow,"Draw by insufficient material", "Game Over!", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
-				if(value == JOptionPane.YES_OPTION) {
-					show();
-				}else {
-					gameWindow.dispose();
-				}
-			}
-		}
 	}
 
 	private class BoardPanel extends JPanel{
@@ -197,7 +152,7 @@ public class ChessPanels extends Observable{
 
 		private final int tileFile;
 		private final int tileRank;
-		
+
 		private Color lightTileColor = new Color(222,227, 230);
 		private Color darkTileColor = new Color(140, 162, 173);
 		private Color borderColor = new Color(255, 0, 0);
@@ -216,7 +171,7 @@ public class ChessPanels extends Observable{
 				@Override
 				public void mouseClicked(MouseEvent e) {
 					if(SwingUtilities.isLeftMouseButton(e)) {
-						if(!getBoard().getCurrentPlayer().isCheckMate() && moveLog.isLast()) {
+						if(!getBoard().getCurrentPlayer().isCheckMate() && moveLog.isLast() && !gameSetup.isPlayerAI(getBoard().getCurrentPlayer())) {
 							if(moveState == MoveState.CHOOSE) {
 								movePiece = getBoard().getPiece(getTileFile(),getTileRank());
 								boardPanel.drawBoard();
@@ -269,6 +224,7 @@ public class ChessPanels extends Observable{
 												moveLog.addMove(move);
 												updateBoard(moveBoard);
 											}
+											movePiece = null;
 											//Board.printBoard(getBoard());
 											//System.out.println("");
 										}
@@ -298,22 +254,24 @@ public class ChessPanels extends Observable{
 
 		@Override
 		public void paintComponent(Graphics g) {
-			super.paintComponent(g);
+			super.paintComponent(g);			
 			Graphics2D g2 = (Graphics2D) g;
 			g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 			g2.setColor(new Color(0.407f, 0.545f, 0.538f, 0.76f));
-			int r = 30;
-			int width = (this.getWidth() - r)/2;
-			int height = (this.getHeight() - r)/2;
-			this.setBorder(BorderFactory.createLineBorder(darkTileColor, 0));
-			if(movePiece != null && movePiece.getPieceColor() == getBoard().getCurrentPlayerColor() && moveLog.isLast()) {
-				if((movePiece.getFile() == this.getTileFile()) && (movePiece.getRank() == this.getTileRank())) {
-					LineBorder tileBorder = (LineBorder) this.getBorder();
-					this.setBorder((tileBorder.getLineColor() == borderColor ? BorderFactory.createEmptyBorder() : BorderFactory.createLineBorder(borderColor, 4)));
-				}
-				for(Move move : movePiece.getLegalMoves(getBoard())) {
-					if((move.getMoveFile() == this.getTileFile()) && (move.getMoveRank() == this.getTileRank()) && !getBoard().movesToCheck(move)) {
-						g2.fillOval(width,height,r,r);
+			if(!gameSetup.isPlayerAI(getBoard().getCurrentPlayer())) {
+				int r = 30;
+				int width = (this.getWidth() - r)/2;
+				int height = (this.getHeight() - r)/2;
+				this.setBorder(BorderFactory.createLineBorder(darkTileColor, 0));
+				if(movePiece != null && movePiece.getPieceColor() == getBoard().getCurrentPlayerColor() && moveLog.isLast()) {
+					if((movePiece.getFile() == this.getTileFile()) && (movePiece.getRank() == this.getTileRank())) {
+						LineBorder tileBorder = (LineBorder) this.getBorder();
+						this.setBorder((tileBorder.getLineColor() == borderColor ? BorderFactory.createEmptyBorder() : BorderFactory.createLineBorder(borderColor, 4)));
+					}
+					for(Move move : movePiece.getLegalMoves(getBoard())) {
+						if((move.getMoveFile() == this.getTileFile()) && (move.getMoveRank() == this.getTileRank()) && !getBoard().movesToCheck(move)) {
+							g2.fillOval(width,height,r,r);
+						}
 					}
 				}
 			}
@@ -325,6 +283,7 @@ public class ChessPanels extends Observable{
 			if(!boardFlipped ? getTileRank() == 0 : getTileRank() == 7) {
 				g2.drawString(BoardUtil.fToA[getTileFile()], this.getWidth()-15, this.getHeight()-5);				
 			}
+			
 		}
 
 		private int getTileFile() {
@@ -335,16 +294,112 @@ public class ChessPanels extends Observable{
 			return tileRank;
 		}
 	}
-	
+
 	private class EngineWatcher implements Observer{
 
 		@Override
 		public void update(Observable obs, Object obj) {
 			// TODO Auto-generated method stub
-			if(!getBoard().getCurrentPlayer().isCheckMate()) {
-				
+			if(moveLog.isLast()) {
+				if(getBoard().getCurrentPlayer().isCheckMate()) {
+					Object[] options = {"New Game",
+					"Exit"};
+					int value = JOptionPane.showOptionDialog(gameWindow, BoardUtil.oppositeColor(getBoard().getCurrentPlayerColor()).toString()+" wins by checkmate!", "Game Over!", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
+					if(value == JOptionPane.YES_OPTION) {
+						updateBoard(Board.createStandardBoard());
+						show();
+					}else {
+						gameWindow.dispose();
+					}
+				}else if(getBoard().getCurrentPlayer().isStaleMate()) {
+					Object[] options = {"New Game",
+					"Exit"};
+					int value = JOptionPane.showOptionDialog(gameWindow, BoardUtil.oppositeColor(getBoard().getCurrentPlayerColor()).toString()+" draws by stalemate!", "Game Over!", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
+					if(value == JOptionPane.YES_OPTION) {
+						updateBoard(Board.createStandardBoard());
+						show();
+					}else {
+						gameWindow.dispose();
+					}
+				}else if(moveLog.isFiftyMoveRule()) {
+					Object[] options = {"New Game",
+					"Exit"};
+					int value = JOptionPane.showOptionDialog(gameWindow, BoardUtil.oppositeColor(getBoard().getCurrentPlayerColor()).toString()+" draws by fifty move rule!", "Game Over!", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
+					if(value == JOptionPane.YES_OPTION) {
+						updateBoard(Board.createStandardBoard());
+						show();
+					}else {
+						gameWindow.dispose();
+					}
+				}else if(getBoard().insufficientMaterial()) {
+					Object[] options = {"New Game",
+					"Exit"};
+					int value = JOptionPane.showOptionDialog(gameWindow,"Draw by insufficient material", "Game Over!", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
+					if(value == JOptionPane.YES_OPTION) {
+						updateBoard(Board.createStandardBoard());
+						show();
+					}else {
+						gameWindow.dispose();
+					}
+				}else {
+					if(gameSetup.isPlayerAI(getBoard().getCurrentPlayer())) {
+						ChessEngine engine = new ChessEngine(getBoard());
+						engine.execute();
+					}
+				}
 			}
 		}
-		
+
 	}
+	
+	private class ChessEngine extends SwingWorker<Move,Object> {
+		
+		private Board board;
+		
+		public ChessEngine(Board board) {
+			this.board = board;
+		};
+
+		@Override
+		public Move doInBackground() throws Exception {
+			// TODO Auto-generated method stub
+			
+			List<Move> legalMoves = board.getLegalMovesByColor(board.getCurrentPlayerColor());
+			for(Iterator<Move> iterator = legalMoves.iterator(); iterator.hasNext();) {
+				Move move = iterator.next();
+				if(board.movesToCheck(move)) {
+					iterator.remove();
+				}
+			}
+			double randomDouble = Math.random();
+			int randomInt = (int) ( randomDouble * legalMoves.size());
+			Move chosenMove = legalMoves.get(randomInt);
+			if(chosenMove.getClass().getName().endsWith("PawnPromotion")) {
+				if(chosenMove.getMoveType() == MoveType.Attack) {
+					return new AttackMove(chosenMove.getMoveFile(), chosenMove.getMoveRank(), new Queen(chosenMove.getMovePiece().getPieceColor(), chosenMove.getMoveFile(), chosenMove.getMoveRank()), chosenMove.getBoard());
+				}else {
+					return new NormalMove(chosenMove.getMoveFile(), chosenMove.getMoveRank(),new Queen(chosenMove.getMovePiece().getPieceColor(), chosenMove.getMoveFile(), chosenMove.getMoveRank()), chosenMove.getBoard());
+				}
+			}
+			Thread.sleep(1000);
+			return legalMoves.get(randomInt);
+			
+		}
+		
+		@Override
+		public void done() {
+			try {
+				Move move = get();
+				Board moveBoard = move.execute();
+				whiteCapturePanel.setTextAdvantage(moveBoard.getCapturedBlackPieces(),moveBoard.getCapturedWhitePieces());
+				blackCapturePanel.setTextAdvantage(moveBoard.getCapturedWhitePieces(),moveBoard.getCapturedBlackPieces());
+				moveLog.addMove(move);
+				ChessPanels.this.updateBoard(moveBoard);
+			} catch (InterruptedException | ExecutionException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}	
+		}
+	}
+
 }
