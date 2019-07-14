@@ -11,7 +11,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.RenderingHints;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
@@ -29,15 +28,12 @@ import javax.swing.border.LineBorder;
 import chess.Alliance;
 import chess.board.Board;
 import chess.board.BoardUtil;
-import chess.move.AttackMove;
+import chess.engine.NegaMax;
 import chess.move.Move;
 import chess.move.MoveState;
-import chess.move.MoveType;
-import chess.move.NormalMove;
 import chess.move.PawnPromotion;
 import chess.pieces.Piece;
 import chess.pieces.PieceType;
-import chess.pieces.Queen;
 
 public class ChessPanels extends Observable{
 
@@ -207,9 +203,7 @@ public class ChessPanels extends Observable{
 														updateBoard(moveBoard);
 													}
 												});
-												specialMove.setNewThread(newThread);
-												specialMove.setGameWindow(gameWindow);
-												Thread t = new Thread(specialMove);
+												Thread t = new Thread(new PromotionSelection(gameWindow, specialMove, newThread));
 												t.start();
 												gameWindow.setEnabled(false);
 											}else {
@@ -303,42 +297,42 @@ public class ChessPanels extends Observable{
 			if(moveLog.isLast()) {
 				if(getBoard().getCurrentPlayer().isCheckMate()) {
 					Object[] options = {"New Game",
-					"Exit"};
-					int value = JOptionPane.showOptionDialog(gameWindow, BoardUtil.oppositeColor(getBoard().getCurrentPlayerColor()).toString()+" wins by checkmate!", "Game Over!", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
+					"Exit","Cancel"};
+					int value = JOptionPane.showOptionDialog(gameWindow, BoardUtil.oppositeColor(getBoard().getCurrentPlayerColor()).toString()+" wins by checkmate!", "Game Over!", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
 					if(value == JOptionPane.YES_OPTION) {
 						updateBoard(Board.createStandardBoard());
 						show();
-					}else {
+					}else if (value == JOptionPane.NO_OPTION) {
 						gameWindow.dispose();
 					}
 				}else if(getBoard().getCurrentPlayer().isStaleMate()) {
 					Object[] options = {"New Game",
-					"Exit"};
+					"Exit","Cancel"};
 					int value = JOptionPane.showOptionDialog(gameWindow, BoardUtil.oppositeColor(getBoard().getCurrentPlayerColor()).toString()+" draws by stalemate!", "Game Over!", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
 					if(value == JOptionPane.YES_OPTION) {
 						updateBoard(Board.createStandardBoard());
 						show();
-					}else {
+					}else if (value == JOptionPane.NO_OPTION) {
 						gameWindow.dispose();
 					}
 				}else if(moveLog.isFiftyMoveRule()) {
 					Object[] options = {"New Game",
-					"Exit"};
+					"Exit","Cancel"};
 					int value = JOptionPane.showOptionDialog(gameWindow, BoardUtil.oppositeColor(getBoard().getCurrentPlayerColor()).toString()+" draws by fifty move rule!", "Game Over!", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
 					if(value == JOptionPane.YES_OPTION) {
 						updateBoard(Board.createStandardBoard());
 						show();
-					}else {
+					}else if (value == JOptionPane.NO_OPTION) {
 						gameWindow.dispose();
 					}
 				}else if(getBoard().insufficientMaterial()) {
 					Object[] options = {"New Game",
-					"Exit"};
+					"Exit","Cancel"};
 					int value = JOptionPane.showOptionDialog(gameWindow,"Draw by insufficient material", "Game Over!", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
 					if(value == JOptionPane.YES_OPTION) {
 						updateBoard(Board.createStandardBoard());
 						show();
-					}else {
+					}else if (value == JOptionPane.NO_OPTION) {
 						gameWindow.dispose();
 					}
 				}else {
@@ -363,26 +357,9 @@ public class ChessPanels extends Observable{
 		@Override
 		public Move doInBackground() throws Exception {
 			// TODO Auto-generated method stub
-			
-			List<Move> legalMoves = board.getLegalMovesByColor(board.getCurrentPlayerColor());
-			for(Iterator<Move> iterator = legalMoves.iterator(); iterator.hasNext();) {
-				Move move = iterator.next();
-				if(board.movesToCheck(move)) {
-					iterator.remove();
-				}
-			}
-			double randomDouble = Math.random();
-			int randomInt = (int) ( randomDouble * legalMoves.size());
-			Move chosenMove = legalMoves.get(randomInt);
-			if(chosenMove.getClass().getName().endsWith("PawnPromotion")) {
-				if(chosenMove.getMoveType() == MoveType.Attack) {
-					return new AttackMove(chosenMove.getMoveFile(), chosenMove.getMoveRank(), new Queen(chosenMove.getMovePiece().getPieceColor(), chosenMove.getMoveFile(), chosenMove.getMoveRank()), chosenMove.getBoard());
-				}else {
-					return new NormalMove(chosenMove.getMoveFile(), chosenMove.getMoveRank(),new Queen(chosenMove.getMovePiece().getPieceColor(), chosenMove.getMoveFile(), chosenMove.getMoveRank()), chosenMove.getBoard());
-				}
-			}
-			Thread.sleep(1000);
-			return legalMoves.get(randomInt);
+
+			NegaMax negaMax = new NegaMax(2);
+			return negaMax.execute(board);
 			
 		}
 		

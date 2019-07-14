@@ -1,5 +1,6 @@
 package chess.board;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -84,5 +85,16 @@ public class BoardUtil {
 		}
 		return notation;
 
+	}
+	
+	public static List<Move> getValidMoves(List<Move> allMoves, Board board){
+		for(Iterator<Move> iterator = allMoves.iterator(); iterator.hasNext();) {
+			Move move = iterator.next();
+			if(board.movesToCheck(move)) {
+				iterator.remove();
+			}
+		}
+		return allMoves;
+		
 	}
 }

@@ -392,7 +392,7 @@ public class Board {
 				Piece piece = board.getPiece(i, j);
 				System.out.print(piece.getPieceType().getPiecePrint(piece.getPieceColor())+" ");
 			}
-			System.out.println();
+			System.out.println("\t");
 		}
 	}
 
