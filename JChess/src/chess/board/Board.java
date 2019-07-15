@@ -11,6 +11,7 @@ import java.util.stream.Stream;
 import chess.Alliance;
 import chess.move.Move;
 import chess.move.NormalMove;
+import chess.move.PawnPromotion;
 import chess.pieces.Bishop;
 import chess.pieces.King;
 import chess.pieces.Knight;
@@ -190,21 +191,24 @@ public class Board {
 
 	public boolean movesToCheck(Move move) {
 		boolean passesCheck = false;
-		King king = move.getBoard().getCurrentPlayer().getKing();
+		King king = this.getPlayerByColor(move.getMovePiece().getPieceColor()).getKing();
 		if(move.getClass().getName().endsWith("ShortSideCastleMove")){
 			NormalMove nextToKing = new NormalMove(king.getFile()+1, king.getRank(), king, move.getBoard());
-			Player nextToKingPlayer = new Player(nextToKing.execute(),move.getBoard().getCurrentPlayerColor());
+			Player nextToKingPlayer = new Player(nextToKing.execute(),move.getMovePiece().getPieceColor());
 			passesCheck = nextToKingPlayer.isInCheck();
 		}else if(move.getClass().getName().endsWith("LongSideCastleMove")) {
 			NormalMove nextToKing = new NormalMove(king.getFile()-1, king.getRank(), king, move.getBoard());
-			Player nextToKingPlayer = new Player(nextToKing.execute(),move.getBoard().getCurrentPlayerColor());
+			Player nextToKingPlayer = new Player(nextToKing.execute(),move.getMovePiece().getPieceColor());
 			passesCheck = nextToKingPlayer.isInCheck();
 		}
 		if(move.getClass().getName().endsWith("PawnPromotion")) {
-			return passesCheck || move.getBoard().getCurrentPlayer().isInCheck();
+			PawnPromotion specialMove = (PawnPromotion) move;
+			specialMove.setChosenPiece(new Queen(move.getMovePiece().getPieceColor(), move.getMoveFile(),move.getMoveRank()));
+			Player player = new Player(specialMove.execute(),move.getMovePiece().getPieceColor());
+			return passesCheck || player.isInCheck();
 		}else {
 			Board moveBoard = move.execute();
-			Player player = new Player(moveBoard,move.getBoard().getCurrentPlayerColor());
+			Player player = new Player(moveBoard,move.getMovePiece().getPieceColor());
 			return player.isInCheck() || passesCheck;
 		}
 	}
@@ -394,6 +398,7 @@ public class Board {
 			}
 			System.out.println("\t");
 		}
+		System.out.println("\n");
 	}
 
 	@Override

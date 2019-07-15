@@ -358,7 +358,7 @@ public class ChessPanels extends Observable{
 		public Move doInBackground() throws Exception {
 			// TODO Auto-generated method stub
 
-			NegaMax negaMax = new NegaMax(2);
+			NegaMax negaMax = new NegaMax(4);
 			return negaMax.execute(board);
 			
 		}

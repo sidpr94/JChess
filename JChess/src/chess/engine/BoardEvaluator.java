@@ -18,7 +18,7 @@ public class BoardEvaluator {
 	
 	public int evaluate(Board board) {
 		
-		return getMaterialScore(board)*mobilityScore(board)*getWhoToMove(board.getCurrentPlayer());
+		return (getMaterialScore(board)+mobilityScore(board)+checkMateScore(board))*getWhoToMove(board.getCurrentPlayer());
 	}
 	
 	private int getMaterialScore(Board board) {
@@ -54,9 +54,13 @@ public class BoardEvaluator {
 	}
 	
 	private int mobilityScore(Board board) {
-		List<Move> whiteLegalMoves = BoardUtil.getValidMoves(board.getWhiteLegalMoves(), board);
-		List<Move> blackLegalMoves = BoardUtil.getValidMoves(board.getBlackLegalMoves(), board);
+		List<Move> whiteLegalMoves = board.getWhiteLegalMoves();
+		List<Move> blackLegalMoves = board.getBlackLegalMoves();
 		return 50*(whiteLegalMoves.size() - blackLegalMoves.size());
+	}
+	
+	private int checkMateScore(Board board) {
+		return 20000*(board.getPlayerByColor(BoardUtil.oppositeColor(board.getCurrentPlayerColor())).isCheckMate() ? 1 : 0);
 	}
 
 }
